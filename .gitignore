@@ -51,3 +51,6 @@ crashlytics-build.properties
 
 .DS_Store
 *.profiler.data
+
+/[Aa]ssets/XR/UserSimulationSettings/
+/[Aa]ssets/XR/UserSimulationSettings.meta
