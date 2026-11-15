@@ -1,0 +1,43 @@
+.gk-root {
+    flex-grow: 1;
+}
+
+.placement-layer {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 140px;
+    align-items: center;
+}
+
+.prompt {
+    flex-direction: row;
+    align-items: center;
+    padding: 18px 28px;
+    border-radius: 40px;
+    background-color: rgba(18, 22, 26, 0.78);
+    border-width: 1px;
+    border-color: rgba(255, 255, 255, 0.12);
+}
+
+.prompt__dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 7px;
+    margin-right: 14px;
+    background-color: rgb(242, 165, 22);
+    transition-property: background-color;
+    transition-duration: 0.25s;
+}
+
+.prompt__text {
+    color: rgb(255, 255, 255);
+    font-size: 30px;
+    -unity-font-style: bold;
+    margin: 0;
+    padding: 0;
+}
+
+.prompt--ready .prompt__dot {
+    background-color: rgb(16, 160, 163);
+}

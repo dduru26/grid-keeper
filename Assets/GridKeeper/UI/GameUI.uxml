@@ -1,0 +1,11 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <Style src="project://database/Assets/GridKeeper/UI/GameUI.uss" />
+    <ui:VisualElement name="root" class="gk-root" picking-mode="Ignore">
+        <ui:VisualElement name="placement-layer" class="placement-layer" picking-mode="Ignore">
+            <ui:VisualElement name="placement-prompt" class="prompt" picking-mode="Ignore">
+                <ui:VisualElement name="prompt-dot" class="prompt__dot" picking-mode="Ignore" />
+                <ui:Label name="prompt-text" class="prompt__text" text="Move your phone slowly over a table" picking-mode="Ignore" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>
