@@ -1,0 +1,94 @@
+using System;
+using System.Collections.Generic;
+using GridKeeper.Data;
+using GridKeeper.Energy;
+using UnityEngine;
+
+namespace GridKeeper.World
+{
+    public class City : MonoBehaviour
+    {
+        private static readonly Vector2Int[] Directions =
+        {
+            Vector2Int.up, Vector2Int.down, Vector2Int.left, Vector2Int.right
+        };
+
+        [SerializeField] private CityLayout layout;
+
+        public event Action<Placeable> PlaceableAdded;
+        public event Action<Placeable> PlaceableRemoved;
+
+        public CityLayout Layout => layout;
+        public IReadOnlyList<Building> Buildings => buildings;
+        public IReadOnlyList<Placeable> Placeables => placeables;
+
+        private readonly List<Building> buildings = new List<Building>();
+        private readonly List<Placeable> placeables = new List<Placeable>();
+        private readonly Dictionary<Vector2Int, Tile> tiles = new Dictionary<Vector2Int, Tile>();
+
+        private void Awake()
+        {
+            Index();
+        }
+
+        public void Index()
+        {
+            tiles.Clear();
+            foreach (Tile tile in GetComponentsInChildren<Tile>(true))
+            {
+                tile.Bind(this);
+                tiles[tile.Coords] = tile;
+            }
+
+            buildings.Clear();
+            buildings.AddRange(GetComponentsInChildren<Building>(true));
+        }
+
+        public Tile GetTile(Vector2Int coords)
+        {
+            return tiles.TryGetValue(coords, out Tile tile) ? tile : null;
+        }
+
+        public IEnumerable<Tile> Neighbours(Tile tile)
+        {
+            foreach (Vector2Int direction in Directions)
+            {
+                Tile neighbour = GetTile(tile.Coords + direction);
+                if (neighbour != null) yield return neighbour;
+            }
+        }
+
+        public float DemandAt(float hour, float multiplier)
+        {
+            float total = 0f;
+            foreach (Building building in buildings)
+            {
+                total += building.DemandAt(hour);
+            }
+            return total * multiplier;
+        }
+
+        public void Register(Placeable placeable)
+        {
+            if (placeables.Contains(placeable)) return;
+            placeables.Add(placeable);
+            PlaceableAdded?.Invoke(placeable);
+        }
+
+        public void Unregister(Placeable placeable)
+        {
+            if (!placeables.Remove(placeable)) return;
+            PlaceableRemoved?.Invoke(placeable);
+        }
+
+        public int Count(SourceKind kind)
+        {
+            int count = 0;
+            foreach (Placeable placeable in placeables)
+            {
+                if (placeable.Definition != null && placeable.Definition.Kind == kind) count++;
+            }
+            return count;
+        }
+    }
+}
