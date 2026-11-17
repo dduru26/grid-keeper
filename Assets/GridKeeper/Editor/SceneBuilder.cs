@@ -1,6 +1,11 @@
 using System.IO;
 using GridKeeper.AR;
+using GridKeeper.Construction;
+using GridKeeper.Core;
+using GridKeeper.Data;
+using GridKeeper.Interaction;
 using GridKeeper.UI;
+using GridKeeper.World;
 using Unity.XR.CoreUtils;
 using UnityEditor;
 using UnityEditor.SceneManagement;
@@ -31,7 +36,9 @@ namespace GridKeeper.EditorTools
         [MenuItem("Grid Keeper/Setup/Build Main Scene")]
         public static void Build()
         {
+            Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
             EnsureFolders();
+            ContentSet content = ContentBuilder.BuildAll();
 
             Texture2D dot = GetOrCreateTexture(TexturesFolder + "/PlaneDot.png", 64, DrawDot);
             Texture2D frame = GetOrCreateTexture(TexturesFolder + "/ReticleFrame.png", 256, DrawDashedFrame);
@@ -39,11 +46,8 @@ namespace GridKeeper.EditorTools
             Material planeMat = GetOrCreateUnlit(MaterialsFolder + "/PlaneDots.mat", new Color(1f, 1f, 1f, 0.85f), dot, new Vector2(25f, 25f), true);
             Material lineMat = GetOrCreateUnlit(MaterialsFolder + "/PlaneEdge.mat", new Color(1f, 1f, 1f, 0.35f), null, Vector2.one, true);
             Material reticleMat = GetOrCreateUnlit(MaterialsFolder + "/Reticle.mat", SolarAmber, frame, Vector2.one, true);
-            Material groundMat = GetOrCreateLit(MaterialsFolder + "/Ground.mat", GroundGreen);
 
             GameObject planePrefab = GetOrCreatePlanePrefab(planeMat, lineMat);
-
-            Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
 
             CreateLight();
 
@@ -71,13 +75,24 @@ namespace GridKeeper.EditorTools
             origin.gameObject.AddComponent<ARAnchorManager>();
 
             PlacementReticle reticle = CreateReticle(reticleMat);
-            Transform city = CreateCityPlaceholder(groundMat);
+            City city = CityBoardBuilder.Build(content);
 
             var placement = origin.gameObject.AddComponent<ARPlacementController>();
-            SetField(placement, "cityRoot", city);
+            SetField(placement, "cityRoot", city.transform);
             SetField(placement, "reticle", reticle);
 
-            CreateUI(placement);
+            var pinch = origin.gameObject.AddComponent<PinchToScale>();
+            SetField(pinch, "placement", placement);
+            SetField(pinch, "balance", content.Balance);
+
+            var gameGo = new GameObject("Game");
+            var game = gameGo.AddComponent<GameManager>();
+            SetField(game, "balance", content.Balance);
+            SetField(game, "city", city);
+            SetField(game, "placement", placement);
+
+            BuildToolbar toolbar = CreateBuildSystem(content, game, placement, pinch);
+            CreateUI(placement, game, toolbar);
 
             EditorSceneManager.SaveScene(scene, ScenePath);
             EditorBuildSettings.scenes = new[] { new EditorBuildSettingsScene(ScenePath, true) };
@@ -116,20 +131,35 @@ namespace GridKeeper.EditorTools
             return reticle;
         }
 
-        private static Transform CreateCityPlaceholder(Material groundMat)
+        private static BuildToolbar CreateBuildSystem(ContentSet content, GameManager game, ARPlacementController placement, PinchToScale pinch)
         {
-            var city = new GameObject("Brightwater");
-            var board = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            board.name = "Board";
-            Object.DestroyImmediate(board.GetComponent<Collider>());
-            board.transform.SetParent(city.transform, false);
-            board.transform.localScale = new Vector3(0.4f, 0.012f, 0.4f);
-            board.transform.localPosition = new Vector3(0f, 0.006f, 0f);
-            board.GetComponent<MeshRenderer>().sharedMaterial = groundMat;
-            return city.transform;
+            var go = new GameObject("Build System");
+            var factory = go.AddComponent<SourceFactory>();
+            SetField(factory, "balance", content.Balance);
+
+            var ghostGo = new GameObject("Ghosts");
+            ghostGo.transform.SetParent(go.transform, false);
+            var ghost = ghostGo.AddComponent<GhostPreview>();
+            SetField(ghost, "validMaterial", content.GhostValid);
+            SetField(ghost, "invalidMaterial", content.GhostInvalid);
+
+            var toolbar = go.AddComponent<BuildToolbar>();
+            SetField(toolbar, "game", game);
+            SetField(toolbar, "placement", placement);
+            SetField(toolbar, "factory", factory);
+            SetField(toolbar, "ghost", ghost);
+            SetField(toolbar, "pinch", pinch);
+
+            var so = new SerializedObject(toolbar);
+            SerializedProperty catalogue = so.FindProperty("catalogue");
+            PlaceableDefinition[] items = { content.Solar, content.Wind, content.Battery };
+            catalogue.arraySize = items.Length;
+            for (int i = 0; i < items.Length; i++) catalogue.GetArrayElementAtIndex(i).objectReferenceValue = items[i];
+            so.ApplyModifiedPropertiesWithoutUndo();
+            return toolbar;
         }
 
-        private static void CreateUI(ARPlacementController placement)
+        private static void CreateUI(ARPlacementController placement, GameManager game, BuildToolbar toolbar)
         {
             var themePath = UIFolder + "/GridKeeperTheme.tss";
             var theme = AssetDatabase.LoadAssetAtPath<ThemeStyleSheet>(themePath);
@@ -152,8 +182,16 @@ namespace GridKeeper.EditorTools
             var document = go.AddComponent<UIDocument>();
             document.panelSettings = panel;
             document.visualTreeAsset = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(UIFolder + "/GameUI.uxml");
+            go.AddComponent<SafeAreaPadding>();
             var prompt = go.AddComponent<PlacementPromptView>();
             SetField(prompt, "placement", placement);
+            var budget = go.AddComponent<BudgetView>();
+            SetField(budget, "game", game);
+            SetField(budget, "placement", placement);
+            var tray = go.AddComponent<BuildTrayView>();
+            SetField(tray, "toolbar", toolbar);
+            SetField(tray, "game", game);
+            SetField(tray, "placement", placement);
         }
 
         private static GameObject GetOrCreatePlanePrefab(Material planeMat, Material lineMat)
@@ -202,21 +240,6 @@ namespace GridKeeper.EditorTools
             return mat;
         }
 
-        private static Material GetOrCreateLit(string path, Color color)
-        {
-            var mat = AssetDatabase.LoadAssetAtPath<Material>(path);
-            if (mat == null)
-            {
-                mat = new Material(Shader.Find("Universal Render Pipeline/Lit"));
-                AssetDatabase.CreateAsset(mat, path);
-            }
-
-            mat.SetColor("_BaseColor", color);
-            mat.SetFloat("_Smoothness", 0.15f);
-            mat.enableInstancing = true;
-            EditorUtility.SetDirty(mat);
-            return mat;
-        }
 
         private static void MakeTransparent(Material mat)
         {

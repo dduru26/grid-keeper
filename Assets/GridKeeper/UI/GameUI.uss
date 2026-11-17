@@ -2,6 +2,45 @@
     flex-grow: 1;
 }
 
+.hidden {
+    display: none;
+}
+
+.hud {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 24px 28px 0 28px;
+}
+
+.pill {
+    background-color: rgba(18, 22, 26, 0.78);
+    border-radius: 26px;
+    padding: 12px 22px;
+    border-width: 1px;
+    border-color: rgba(255, 255, 255, 0.12);
+}
+
+.pill__caption {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 18px;
+    -unity-font-style: bold;
+    letter-spacing: 2px;
+    margin: 0;
+    padding: 0;
+}
+
+.pill__value {
+    color: rgb(255, 255, 255);
+    font-size: 40px;
+    -unity-font-style: bold;
+    margin: 0;
+    padding: 0;
+}
+
 .placement-layer {
     position: absolute;
     left: 0;
@@ -40,4 +79,135 @@
 
 .prompt--ready .prompt__dot {
     background-color: rgb(16, 160, 163);
+}
+
+.build-layer {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    align-items: center;
+    padding: 0 20px 36px 20px;
+}
+
+.build-hint {
+    color: rgb(255, 255, 255);
+    background-color: rgba(18, 22, 26, 0.72);
+    border-radius: 22px;
+    padding: 10px 20px;
+    font-size: 24px;
+    margin-bottom: 16px;
+    -unity-text-align: middle-center;
+}
+
+.build-hint--bad {
+    color: rgb(255, 196, 190);
+    border-width: 1px;
+    border-color: rgb(214, 69, 59);
+}
+
+.tray {
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
+    background-color: rgba(18, 22, 26, 0.82);
+    border-radius: 34px;
+    padding: 12px;
+    border-width: 1px;
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.tool {
+    flex-grow: 1;
+    flex-basis: 0;
+    margin: 0 5px;
+    padding: 14px 4px 12px 4px;
+    border-radius: 24px;
+    border-width: 2px;
+    border-color: rgba(0, 0, 0, 0);
+    background-color: rgba(255, 255, 255, 0.06);
+    align-items: center;
+    transition-property: background-color, border-color, scale;
+    transition-duration: 0.15s;
+}
+
+.tool:hover {
+    background-color: rgba(255, 255, 255, 0.06);
+}
+
+.tool:active {
+    scale: 0.95 0.95;
+}
+
+.tool--selected {
+    background-color: rgba(255, 255, 255, 0.16);
+    border-color: rgb(255, 255, 255);
+}
+
+.tool--disabled {
+    opacity: 0.4;
+}
+
+.tool__icon {
+    width: 56px;
+    height: 44px;
+    margin-bottom: 8px;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.icon-solar {
+    height: 22px;
+    margin-top: 22px;
+    background-color: rgb(242, 165, 22);
+    border-radius: 4px;
+    rotate: -12deg;
+}
+
+.icon-wind {
+    width: 8px;
+    background-color: rgb(16, 160, 163);
+    border-radius: 3px;
+    overflow: visible;
+}
+
+.icon-wind__head {
+    position: absolute;
+    top: -6px;
+    left: -10px;
+    width: 28px;
+    height: 12px;
+    border-radius: 6px;
+    background-color: rgb(16, 160, 163);
+}
+
+.icon-battery {
+    width: 44px;
+    background-color: rgb(123, 92, 230);
+    border-radius: 6px;
+    border-top-width: 6px;
+    border-color: rgb(165, 143, 240);
+}
+
+.icon-remove {
+    width: 40px;
+    height: 40px;
+    border-radius: 20px;
+    border-width: 5px;
+    border-color: rgb(214, 69, 59);
+}
+
+.tool__name {
+    color: rgb(255, 255, 255);
+    font-size: 24px;
+    -unity-font-style: bold;
+    margin: 0;
+    padding: 0;
+}
+
+.tool__cost {
+    color: rgba(255, 255, 255, 0.65);
+    font-size: 20px;
+    margin: 2px 0 0 0;
+    padding: 0;
 }

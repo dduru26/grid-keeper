@@ -1,10 +1,43 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements">
     <Style src="project://database/Assets/GridKeeper/UI/GameUI.uss" />
     <ui:VisualElement name="root" class="gk-root" picking-mode="Ignore">
+        <ui:VisualElement name="hud" class="hud hidden" picking-mode="Ignore">
+            <ui:VisualElement name="budget" class="pill budget" picking-mode="Ignore">
+                <ui:Label text="BUDGET" class="pill__caption" picking-mode="Ignore" />
+                <ui:Label name="budget-value" text="$900" class="pill__value" picking-mode="Ignore" />
+            </ui:VisualElement>
+        </ui:VisualElement>
         <ui:VisualElement name="placement-layer" class="placement-layer" picking-mode="Ignore">
             <ui:VisualElement name="placement-prompt" class="prompt" picking-mode="Ignore">
                 <ui:VisualElement name="prompt-dot" class="prompt__dot" picking-mode="Ignore" />
                 <ui:Label name="prompt-text" class="prompt__text" text="Move your phone slowly over a table" picking-mode="Ignore" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="build-layer" class="build-layer hidden" picking-mode="Ignore">
+            <ui:Label name="build-hint" class="build-hint" text="Pick a source, then tap a tile" picking-mode="Ignore" />
+            <ui:VisualElement name="tray" class="tray">
+                <ui:Button name="tool-solar" class="tool tool--solar">
+                    <ui:VisualElement class="tool__icon icon-solar" picking-mode="Ignore" />
+                    <ui:Label text="Solar" class="tool__name" picking-mode="Ignore" />
+                    <ui:Label name="tool-solar-cost" text="$150" class="tool__cost" picking-mode="Ignore" />
+                </ui:Button>
+                <ui:Button name="tool-wind" class="tool tool--wind">
+                    <ui:VisualElement class="tool__icon icon-wind" picking-mode="Ignore">
+                        <ui:VisualElement class="icon-wind__head" picking-mode="Ignore" />
+                    </ui:VisualElement>
+                    <ui:Label text="Wind" class="tool__name" picking-mode="Ignore" />
+                    <ui:Label name="tool-wind-cost" text="$200" class="tool__cost" picking-mode="Ignore" />
+                </ui:Button>
+                <ui:Button name="tool-battery" class="tool tool--battery">
+                    <ui:VisualElement class="tool__icon icon-battery" picking-mode="Ignore" />
+                    <ui:Label text="Battery" class="tool__name" picking-mode="Ignore" />
+                    <ui:Label name="tool-battery-cost" text="$120" class="tool__cost" picking-mode="Ignore" />
+                </ui:Button>
+                <ui:Button name="tool-remove" class="tool tool--remove">
+                    <ui:VisualElement class="tool__icon icon-remove" picking-mode="Ignore" />
+                    <ui:Label text="Remove" class="tool__name" picking-mode="Ignore" />
+                    <ui:Label text="50% back" class="tool__cost" picking-mode="Ignore" />
+                </ui:Button>
             </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>
