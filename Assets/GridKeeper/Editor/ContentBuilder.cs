@@ -16,6 +16,10 @@ namespace GridKeeper.EditorTools
         public PlaceableDefinition Solar;
         public PlaceableDefinition Wind;
         public PlaceableDefinition Battery;
+        public WeatherProfile Clear;
+        public WeatherProfile Cloudy;
+        public WeatherProfile Windy;
+        public WeatherProfile Heatwave;
         public readonly Dictionary<char, GameObject> BuildingPrefabs = new Dictionary<char, GameObject>();
         public GameObject TreePrefab;
         public Material GrassA;
@@ -66,6 +70,11 @@ namespace GridKeeper.EditorTools
             set.Solar = Definition("Solar", SourceKind.Solar, "Solar panel", 150, BuildSolar(), SceneBuilder.SolarAmber, 8f, 0f, 0f);
             set.Wind = Definition("Wind", SourceKind.Wind, "Wind turbine", 200, BuildTurbine(), SceneBuilder.WindTeal, 6f, 0f, 0f);
             set.Battery = Definition("Battery", SourceKind.Battery, "Battery", 120, BuildBattery(), SceneBuilder.BatteryViolet, 0f, 30f, 8f);
+
+            set.Clear = Weather("WeatherClear", WeatherKind.Clear, "Clear skies", "Strong sun all day. Store some of it for the evening.", new Vector2(0f, 0.15f), new Vector2(0.25f, 0.5f), false, "#F2A516");
+            set.Cloudy = Weather("WeatherCloudy", WeatherKind.Cloudy, "Heavy cloud", "Solar drops by up to 75%. Lean on wind and storage.", new Vector2(0.6f, 1f), new Vector2(0.3f, 0.6f), false, "#A7B1BA");
+            set.Windy = Weather("WeatherWindy", WeatherKind.Windy, "Strong wind", "Turbines on the ridge will shine today.", new Vector2(0.2f, 0.5f), new Vector2(0.65f, 1f), false, "#10A0A3");
+            set.Heatwave = Weather("WeatherHeatwave", WeatherKind.Heatwave, "Heatwave", "Demand rises by 30% and the air goes still. Charge up early.", new Vector2(0f, 0.05f), new Vector2(0.05f, 0.25f), true, "#E8743B");
 
             set.BuildingPrefabs[CityLayout.House] = BuildHouse(BuildingDef("House", BuildingKind.House, 1.6f, HouseCurve()));
             set.BuildingPrefabs[CityLayout.Shop] = BuildShop(BuildingDef("Shop", BuildingKind.Shop, 2.4f, ShopCurve()));
@@ -272,6 +281,15 @@ namespace GridKeeper.EditorTools
             def.Configure(kind, name, cost, prefab, accent, rated, capacity, rate);
             EditorUtility.SetDirty(def);
             return def;
+        }
+
+        private static WeatherProfile Weather(string file, WeatherKind kind, string label, string advice, Vector2 cloud, Vector2 wind, bool heat, string hex)
+        {
+            var profile = GetOrCreateAsset<WeatherProfile>(DataFolder + "/" + file + ".asset");
+            ColorUtility.TryParseHtmlString(hex, out Color tint);
+            profile.Configure(kind, label, advice, cloud, wind, heat, tint);
+            EditorUtility.SetDirty(profile);
+            return profile;
         }
 
         private static BuildingDefinition BuildingDef(string file, BuildingKind kind, float peak, AnimationCurve curve)
