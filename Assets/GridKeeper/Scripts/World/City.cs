@@ -24,6 +24,7 @@ namespace GridKeeper.World
 
         private readonly List<Building> buildings = new List<Building>();
         private readonly List<Placeable> placeables = new List<Placeable>();
+        private readonly List<Building> sorted = new List<Building>();
         private readonly Dictionary<Vector2Int, Tile> tiles = new Dictionary<Vector2Int, Tile>();
 
         private void Awake()
@@ -66,6 +67,42 @@ namespace GridKeeper.World
                 total += building.DemandAt(hour);
             }
             return total * multiplier;
+        }
+
+        public int ApplySupply(float suppliedMW, float hour, float multiplier)
+        {
+            sorted.Clear();
+            sorted.AddRange(buildings);
+            sorted.Sort((a, b) => Priority(a).CompareTo(Priority(b)));
+
+            float remaining = suppliedMW + 0.001f;
+            int dark = 0;
+            foreach (Building building in sorted)
+            {
+                float need = building.DemandAt(hour) * multiplier;
+                bool lit = need <= remaining;
+                if (lit) remaining -= need;
+                else dark++;
+                building.SetLit(lit);
+            }
+            return dark;
+        }
+
+        public void LightAll()
+        {
+            foreach (Building building in buildings) building.SetLit(true);
+        }
+
+        private static int Priority(Building building)
+        {
+            if (building.Definition == null) return 9;
+            switch (building.Definition.Kind)
+            {
+                case BuildingKind.Hospital: return 0;
+                case BuildingKind.House: return 1;
+                case BuildingKind.Shop: return 2;
+                default: return 3;
+            }
         }
 
         public void Register(Placeable placeable)
