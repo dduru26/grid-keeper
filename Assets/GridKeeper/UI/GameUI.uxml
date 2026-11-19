@@ -1,11 +1,43 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements">
     <Style src="project://database/Assets/GridKeeper/UI/GameUI.uss" />
     <ui:VisualElement name="root" class="gk-root" picking-mode="Ignore">
+        <ui:VisualElement name="blackout-edge" class="blackout-edge" picking-mode="Ignore" />
         <ui:VisualElement name="hud" class="hud hidden" picking-mode="Ignore">
-            <ui:VisualElement name="budget" class="pill budget" picking-mode="Ignore">
-                <ui:Label text="BUDGET" class="pill__caption" picking-mode="Ignore" />
-                <ui:Label name="budget-value" text="$900" class="pill__value" picking-mode="Ignore" />
+            <ui:VisualElement class="hud__row" picking-mode="Ignore">
+                <ui:VisualElement name="budget" class="pill budget" picking-mode="Ignore">
+                    <ui:Label text="BUDGET" class="pill__caption" picking-mode="Ignore" />
+                    <ui:Label name="budget-value" text="$900" class="pill__value" picking-mode="Ignore" />
+                </ui:VisualElement>
+                <ui:VisualElement name="clock" class="pill clock" picking-mode="Ignore">
+                    <ui:Label name="clock-day" text="DAY 1 OF 3" class="pill__caption" picking-mode="Ignore" />
+                    <ui:Label name="clock-time" text="06:00" class="pill__value mono" picking-mode="Ignore" />
+                </ui:VisualElement>
+                <ui:Button name="pause-button" class="round-button">
+                    <ui:VisualElement class="pause-icon" picking-mode="Ignore">
+                        <ui:VisualElement class="pause-icon__bar" picking-mode="Ignore" />
+                        <ui:VisualElement class="pause-icon__bar" picking-mode="Ignore" />
+                    </ui:VisualElement>
+                </ui:Button>
             </ui:VisualElement>
+            <ui:VisualElement name="forecast" class="forecast" picking-mode="Ignore">
+                <ui:VisualElement name="forecast-today" class="forecast__chip" picking-mode="Ignore">
+                    <ui:VisualElement name="forecast-today-swatch" class="forecast__swatch" picking-mode="Ignore" />
+                    <ui:Label name="forecast-today-text" text="Today: Clear skies" class="forecast__text" picking-mode="Ignore" />
+                </ui:VisualElement>
+                <ui:VisualElement name="forecast-next" class="forecast__chip forecast__chip--next" picking-mode="Ignore">
+                    <ui:VisualElement name="forecast-next-swatch" class="forecast__swatch" picking-mode="Ignore" />
+                    <ui:Label name="forecast-next-text" text="Tomorrow: Cloudy" class="forecast__text" picking-mode="Ignore" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement name="stats-card" class="card stats" picking-mode="Ignore">
+                <ui:VisualElement class="stats__legend" picking-mode="Ignore">
+                    <ui:Label name="stat-supply" text="SUPPLY 0.0 MW" class="legend legend--supply mono" picking-mode="Ignore" />
+                    <ui:Label name="stat-demand" text="DEMAND 0.0 MW" class="legend legend--demand mono" picking-mode="Ignore" />
+                    <ui:Label name="stat-battery" text="STORED 0%" class="legend legend--battery mono" picking-mode="Ignore" />
+                </ui:VisualElement>
+                <ui:VisualElement name="live-chart" class="chart chart--live" picking-mode="Ignore" />
+            </ui:VisualElement>
+            <ui:Label name="day-banner" text="Day 1 · Clear skies" class="day-banner hidden" picking-mode="Ignore" />
         </ui:VisualElement>
         <ui:VisualElement name="placement-layer" class="placement-layer" picking-mode="Ignore">
             <ui:VisualElement name="placement-prompt" class="prompt" picking-mode="Ignore">
@@ -14,6 +46,7 @@
             </ui:VisualElement>
         </ui:VisualElement>
         <ui:VisualElement name="build-layer" class="build-layer hidden" picking-mode="Ignore">
+            <ui:Button name="start-button" text="Start the shift" class="primary-button start-floating hidden" />
             <ui:Label name="build-hint" class="build-hint" text="Pick a source, then tap a tile" picking-mode="Ignore" />
             <ui:VisualElement name="tray" class="tray">
                 <ui:Button name="tool-solar" class="tool tool--solar">
@@ -38,6 +71,50 @@
                     <ui:Label text="Remove" class="tool__name" picking-mode="Ignore" />
                     <ui:Label text="50% back" class="tool__cost" picking-mode="Ignore" />
                 </ui:Button>
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="briefing" class="overlay hidden">
+            <ui:VisualElement class="sheet">
+                <ui:Label text="A MESSAGE FROM THE COUNCIL" class="sheet__eyebrow" />
+                <ui:Label text="Welcome, Keeper." class="sheet__title" />
+                <ui:Label text="The old generator has been removed and Brightwater relies on you now. Houses need light at night, the factory runs during working hours and the hospital can never go dark. You have three days and a small budget. Watch the sky." class="sheet__body" />
+                <ui:VisualElement name="briefing-forecast" class="briefing-forecast" />
+                <ui:Button name="plan-button" text="Plan the grid" class="primary-button" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="pause" class="overlay hidden">
+            <ui:VisualElement class="sheet sheet--compact">
+                <ui:Label text="Paused" class="sheet__title" />
+                <ui:Label text="The town waits for you." class="sheet__body" />
+                <ui:Button name="resume-button" text="Resume" class="primary-button" />
+                <ui:Button name="restart-button" text="Restart shift" class="secondary-button" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="results" class="overlay hidden">
+            <ui:VisualElement class="sheet">
+                <ui:Label text="SHIFT COMPLETE" class="sheet__eyebrow" />
+                <ui:VisualElement class="results__head">
+                    <ui:Label name="results-grade" text="A" class="grade" />
+                    <ui:VisualElement class="results__headline">
+                        <ui:Label name="results-share" text="94% of demand met" class="sheet__title" />
+                        <ui:Label name="results-note" text="Brightwater slept soundly." class="sheet__body" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement name="results-chart" class="chart chart--results" picking-mode="Ignore" />
+                <ui:VisualElement class="chart-key" picking-mode="Ignore">
+                    <ui:Label text="Solar" class="key key--solar" />
+                    <ui:Label text="Wind" class="key key--wind" />
+                    <ui:Label text="Stored" class="key key--battery" />
+                    <ui:Label text="Demand" class="key key--demand" />
+                    <ui:Label text="Dark" class="key key--dark" />
+                </ui:VisualElement>
+                <ui:VisualElement class="results__rows">
+                    <ui:Label name="results-delivered" text="Energy delivered" class="row mono" />
+                    <ui:Label name="results-blackout" text="Hours in the dark" class="row mono" />
+                    <ui:Label name="results-wasted" text="Energy wasted" class="row mono" />
+                    <ui:Label name="results-earned" text="Money earned" class="row mono" />
+                </ui:VisualElement>
+                <ui:Button name="again-button" text="Play again" class="primary-button" />
             </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>
