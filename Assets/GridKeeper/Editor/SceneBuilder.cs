@@ -4,6 +4,7 @@ using GridKeeper.Construction;
 using GridKeeper.Core;
 using GridKeeper.Data;
 using GridKeeper.Interaction;
+using GridKeeper.Simulation;
 using GridKeeper.UI;
 using GridKeeper.World;
 using Unity.XR.CoreUtils;
@@ -86,12 +87,20 @@ namespace GridKeeper.EditorTools
             SetField(pinch, "balance", content.Balance);
 
             var gameGo = new GameObject("Game");
+            var weather = gameGo.AddComponent<WeatherSystem>();
+            SetField(weather, "clear", content.Clear);
+            SetField(weather, "cloudy", content.Cloudy);
+            SetField(weather, "windy", content.Windy);
+            SetField(weather, "heatwave", content.Heatwave);
             var game = gameGo.AddComponent<GameManager>();
             SetField(game, "balance", content.Balance);
             SetField(game, "city", city);
             SetField(game, "placement", placement);
+            SetField(game, "weather", weather);
 
             BuildToolbar toolbar = CreateBuildSystem(content, game, placement, pinch);
+            SetField(game, "factory", toolbar.GetComponent<SourceFactory>());
+            SetField(game, "toolbar", toolbar);
             CreateUI(placement, game, toolbar);
 
             EditorSceneManager.SaveScene(scene, ScenePath);
@@ -187,11 +196,13 @@ namespace GridKeeper.EditorTools
             SetField(prompt, "placement", placement);
             var budget = go.AddComponent<BudgetView>();
             SetField(budget, "game", game);
-            SetField(budget, "placement", placement);
             var tray = go.AddComponent<BuildTrayView>();
             SetField(tray, "toolbar", toolbar);
             SetField(tray, "game", game);
-            SetField(tray, "placement", placement);
+            var hud = go.AddComponent<HudView>();
+            SetField(hud, "game", game);
+            var overlay = go.AddComponent<OverlayView>();
+            SetField(overlay, "game", game);
         }
 
         private static GameObject GetOrCreatePlanePrefab(Material planeMat, Material lineMat)
