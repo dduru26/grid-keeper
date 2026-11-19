@@ -31,10 +31,11 @@ namespace GridKeeper.UI
             Vector2 bottomRight = RuntimePanelUtils.ScreenToPanel(root.panel, new Vector2(lastSafeArea.xMax, Screen.height - lastSafeArea.yMin));
             Vector2 full = RuntimePanelUtils.ScreenToPanel(root.panel, new Vector2(Screen.width, Screen.height));
 
-            root.style.paddingTop = topLeft.y;
-            root.style.paddingLeft = topLeft.x;
-            root.style.paddingRight = full.x - bottomRight.x;
-            root.style.paddingBottom = full.y - bottomRight.y;
+            root.style.position = Position.Absolute;
+            root.style.top = topLeft.y;
+            root.style.left = topLeft.x;
+            root.style.right = full.x - bottomRight.x;
+            root.style.bottom = full.y - bottomRight.y;
         }
     }
 }

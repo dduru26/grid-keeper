@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using GridKeeper.AR;
 using GridKeeper.Construction;
 using GridKeeper.Core;
 using GridKeeper.Data;
@@ -13,11 +12,9 @@ namespace GridKeeper.UI
     {
         [SerializeField] private BuildToolbar toolbar;
         [SerializeField] private GameManager game;
-        [SerializeField] private ARPlacementController placement;
 
         private readonly Dictionary<SourceKind, Button> buttons = new Dictionary<SourceKind, Button>();
         private readonly Dictionary<SourceKind, PlaceableDefinition> definitions = new Dictionary<SourceKind, PlaceableDefinition>();
-        private VisualElement layer;
         private Button removeButton;
         private Label hint;
 
@@ -25,10 +22,8 @@ namespace GridKeeper.UI
         {
             if (toolbar == null) toolbar = FindAnyObjectByType<BuildToolbar>();
             if (game == null) game = FindAnyObjectByType<GameManager>();
-            if (placement == null) placement = FindAnyObjectByType<ARPlacementController>();
 
             VisualElement root = GetComponent<UIDocument>().rootVisualElement;
-            layer = root.Q<VisualElement>("build-layer");
             hint = root.Q<Label>("build-hint");
             removeButton = root.Q<Button>("tool-remove");
             removeButton.clicked += toolbar.SelectRemove;
@@ -51,7 +46,6 @@ namespace GridKeeper.UI
             toolbar.ToolChanged += RenderSelection;
             toolbar.Feedback += RenderFeedback;
             game.Wallet.Changed += RenderAffordability;
-            placement.CityPlaced += OnPlaced;
 
             RenderSelection();
             RenderAffordability(game.Wallet.Balance);
@@ -65,12 +59,6 @@ namespace GridKeeper.UI
                 toolbar.Feedback -= RenderFeedback;
             }
             if (game != null && game.Wallet != null) game.Wallet.Changed -= RenderAffordability;
-            if (placement != null) placement.CityPlaced -= OnPlaced;
-        }
-
-        private void OnPlaced(Transform city)
-        {
-            layer.RemoveFromClassList("hidden");
         }
 
         private void RenderSelection()
