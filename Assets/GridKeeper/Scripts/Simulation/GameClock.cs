@@ -40,6 +40,8 @@ namespace GridKeeper.Simulation
         }
 
         public float Interpolation => Mathf.Clamp01(pendingHours / TickHours);
+        public float SmoothElapsedHours => Mathf.Min(TotalHours, ElapsedHours + pendingHours);
+        public float SmoothHourOfDay => Mathf.Repeat(StartHour + SmoothElapsedHours, 24f);
 
         public void Reset()
         {

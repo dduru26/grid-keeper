@@ -26,6 +26,16 @@ namespace GridKeeper.World
             return definition == null ? 0f : definition.DemandAt(hour);
         }
 
+        public void UseLitMaterial(Material material)
+        {
+            litWindow = material;
+            if (!IsLit) return;
+            foreach (Renderer window in windows)
+            {
+                if (window != null) window.sharedMaterial = material;
+            }
+        }
+
         public void SetLit(bool lit)
         {
             if (IsLit == lit) return;
