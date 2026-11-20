@@ -22,6 +22,7 @@ namespace GridKeeper.EditorTools
         public WeatherProfile Heatwave;
         public readonly Dictionary<char, GameObject> BuildingPrefabs = new Dictionary<char, GameObject>();
         public GameObject TreePrefab;
+        public GameObject CloudPrefab;
         public Material GrassA;
         public Material GrassB;
         public Material Hill;
@@ -81,6 +82,7 @@ namespace GridKeeper.EditorTools
             set.BuildingPrefabs[CityLayout.Factory] = BuildFactory(BuildingDef("Factory", BuildingKind.Factory, 6f, FactoryCurve()));
             set.BuildingPrefabs[CityLayout.Hospital] = BuildHospital(BuildingDef("Hospital", BuildingKind.Hospital, 3f, AnimationCurve.Constant(0f, 24f, 1f)));
             set.TreePrefab = BuildTree();
+            set.CloudPrefab = BuildCloud();
 
             AssetDatabase.SaveAssets();
             return set;
@@ -195,6 +197,9 @@ namespace GridKeeper.EditorTools
             Part(root.transform, "Chimney", LowPolyMeshes.Cylinder8, Lit("Brick", "#A0644C"), new Vector3(0.014f, 0f, 0.012f), new Vector3(0.007f, 0.042f, 0.007f));
             Part(root.transform, "Chimney Band", LowPolyMeshes.Cylinder8, Lit("TurbineWhite", "#F3F5F6"), new Vector3(0.014f, 0.036f, 0.012f), new Vector3(0.0075f, 0.003f, 0.0075f));
             Part(root.transform, "Gate", LowPolyMeshes.Box, Lit("Gate", "#5E666B"), new Vector3(-0.01f, 0f, -0.0202f), new Vector3(0.012f, 0.011f, 0.0006f));
+            var chimneyTop = new GameObject("Chimney Top").transform;
+            chimneyTop.SetParent(root.transform, false);
+            chimneyTop.localPosition = new Vector3(0.014f, 0.043f, 0.012f);
             var windows = new List<Renderer>
             {
                 Window(root.transform, new Vector3(0.004f, 0.009f, -0.0202f), 0.006f, 0.005f),
@@ -202,7 +207,33 @@ namespace GridKeeper.EditorTools
                 Window(root.transform, new Vector3(0.0212f, 0.008f, -0.006f), 0.006f, 0.005f, 90f),
                 Window(root.transform, new Vector3(0.0212f, 0.008f, 0.006f), 0.006f, 0.005f, 90f)
             };
-            return FinishBuilding(root, def, windows);
+            GameObject factory = FinishBuildingUnsaved(root, def, windows);
+            var smoke = factory.AddComponent<GridKeeper.Presentation.FactorySmoke>();
+            SetField(smoke, "chimneyTop", chimneyTop);
+            SetField(smoke, "puffPrefab", BuildPuff());
+            return SavePrefab(factory, BuildingPrefabs + "/Factory.prefab");
+        }
+
+        private static GameObject BuildPuff()
+        {
+            var root = new GameObject("Smoke Puff");
+            Part(root.transform, "Puff", LowPolyMeshes.Cone6, Lit("Smoke", "#DCDCDA"), new Vector3(0f, -0.5f, 0f), Vector3.one);
+            foreach (Renderer r in root.GetComponentsInChildren<Renderer>()) r.shadowCastingMode = ShadowCastingMode.Off;
+            GameObject prefab = PrefabUtility.SaveAsPrefabAsset(root, BuildingPrefabs + "/SmokePuff.prefab");
+            Object.DestroyImmediate(root);
+            return prefab;
+        }
+
+        private static GameObject BuildCloud()
+        {
+            var root = new GameObject("Cloud");
+            Material cloud = Lit("Cloud", "#FFFFFF", 0.05f);
+            Part(root.transform, "Puff A", LowPolyMeshes.Cylinder8, cloud, new Vector3(0f, 0f, 0f), new Vector3(0.06f, 0.012f, 0.04f));
+            Part(root.transform, "Puff B", LowPolyMeshes.Cylinder8, cloud, new Vector3(0.012f, 0.008f, 0.002f), new Vector3(0.036f, 0.012f, 0.028f));
+            Part(root.transform, "Puff C", LowPolyMeshes.Cylinder8, cloud, new Vector3(-0.016f, 0.006f, -0.003f), new Vector3(0.028f, 0.01f, 0.024f));
+            GameObject prefab = PrefabUtility.SaveAsPrefabAsset(root, BuildingPrefabs + "/Cloud.prefab");
+            Object.DestroyImmediate(root);
+            return prefab;
         }
 
         private static GameObject BuildHospital(BuildingDefinition def)
@@ -254,6 +285,13 @@ namespace GridKeeper.EditorTools
 
         public static Material WindowLit => Emissive("WindowLit", "#FFD27A", 1.6f);
         public static Material WindowDark => Lit("WindowDark", "#3A4048", 0.4f);
+
+        private static GameObject FinishBuildingUnsaved(GameObject root, BuildingDefinition def, List<Renderer> windows)
+        {
+            var building = root.AddComponent<GridKeeper.World.Building>();
+            building.Setup(def, windows.ToArray(), WindowLit, WindowDark);
+            return root;
+        }
 
         private static GameObject FinishBuilding(GameObject root, BuildingDefinition def, List<Renderer> windows)
         {
