@@ -113,10 +113,10 @@ namespace GridKeeper.UI
             grade.EnableInClassList("grade--D", result.Grade == Grade.D);
             share.text = Mathf.RoundToInt(result.ShareMet * 100f) + "% of demand met";
             note.text = result.CouncilNote;
-            delivered.text = "Energy delivered    " + stats.DeliveredMWh.ToString("0") + " of " + stats.DemandMWh.ToString("0") + " MWh";
-            blackout.text = "Hours in the dark   " + stats.BlackoutHours.ToString("0.0") + " h";
-            wasted.text = "Energy wasted       " + stats.WastedMWh.ToString("0") + " MWh";
-            earned.text = "Money earned        $" + stats.Earned.ToString("N0");
+            delivered.text = stats.DeliveredMWh.ToString("0") + " of " + stats.DemandMWh.ToString("0") + " MWh";
+            blackout.text = stats.BlackoutHours.ToString("0.0") + " h";
+            wasted.text = stats.WastedMWh.ToString("0") + " MWh";
+            earned.text = "$" + stats.Earned.ToString("N0");
             chart.SetData(stats.Samples, game.Clock.TotalHours, game.Clock.TotalHours, false);
         }
     }

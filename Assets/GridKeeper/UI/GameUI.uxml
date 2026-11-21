@@ -46,6 +46,11 @@
             </ui:VisualElement>
         </ui:VisualElement>
         <ui:VisualElement name="build-layer" class="build-layer hidden" picking-mode="Ignore">
+            <ui:VisualElement name="tutorial-hint" class="tutorial-hint hidden">
+                <ui:Label text="KEEPER'S NOTES" class="tutorial-hint__eyebrow" picking-mode="Ignore" />
+                <ui:Label name="tutorial-text" text="Hint" class="tutorial-hint__text" picking-mode="Ignore" />
+                <ui:Button name="tutorial-skip" text="Skip tutorial" class="tutorial-hint__skip" />
+            </ui:VisualElement>
             <ui:Button name="start-button" text="Start the shift" class="primary-button start-floating hidden" />
             <ui:Label name="build-hint" class="build-hint" text="Pick a source, then tap a tile" picking-mode="Ignore" />
             <ui:VisualElement name="tray" class="tray">
@@ -88,6 +93,7 @@
                 <ui:Label text="The town waits for you." class="sheet__body" />
                 <ui:Button name="resume-button" text="Resume" class="primary-button" />
                 <ui:Button name="restart-button" text="Restart shift" class="secondary-button" />
+                <ui:Button name="replay-tutorial-button" text="Replay tutorial" class="secondary-button" />
             </ui:VisualElement>
         </ui:VisualElement>
         <ui:VisualElement name="results" class="overlay hidden">
@@ -109,10 +115,22 @@
                     <ui:Label text="Dark" class="key key--dark" />
                 </ui:VisualElement>
                 <ui:VisualElement class="results__rows">
-                    <ui:Label name="results-delivered" text="Energy delivered" class="row mono" />
-                    <ui:Label name="results-blackout" text="Hours in the dark" class="row mono" />
-                    <ui:Label name="results-wasted" text="Energy wasted" class="row mono" />
-                    <ui:Label name="results-earned" text="Money earned" class="row mono" />
+                    <ui:VisualElement class="row">
+                        <ui:Label text="Energy delivered" class="row__label" />
+                        <ui:Label name="results-delivered" text="0" class="row__value mono" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="row">
+                        <ui:Label text="Hours in the dark" class="row__label" />
+                        <ui:Label name="results-blackout" text="0" class="row__value mono" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="row">
+                        <ui:Label text="Energy wasted" class="row__label" />
+                        <ui:Label name="results-wasted" text="0" class="row__value mono" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="row">
+                        <ui:Label text="Money earned" class="row__label" />
+                        <ui:Label name="results-earned" text="0" class="row__value mono" />
+                    </ui:VisualElement>
                 </ui:VisualElement>
                 <ui:Button name="again-button" text="Play again" class="primary-button" />
             </ui:VisualElement>
