@@ -4,6 +4,8 @@ using GridKeeper.Construction;
 using GridKeeper.Core;
 using GridKeeper.Data;
 using GridKeeper.Interaction;
+using GridKeeper.Presentation;
+using GridKeeper.Tutorial;
 using GridKeeper.Simulation;
 using GridKeeper.UI;
 using GridKeeper.World;
@@ -50,7 +52,7 @@ namespace GridKeeper.EditorTools
 
             GameObject planePrefab = GetOrCreatePlanePrefab(planeMat, lineMat);
 
-            CreateLight();
+            Light sun = CreateLight();
 
             Selection.activeObject = null;
             EditorApplication.ExecuteMenuItem("GameObject/XR/AR Session");
@@ -101,7 +103,36 @@ namespace GridKeeper.EditorTools
             BuildToolbar toolbar = CreateBuildSystem(content, game, placement, pinch);
             SetField(game, "factory", toolbar.GetComponent<SourceFactory>());
             SetField(game, "toolbar", toolbar);
+            var cloudsGo = new GameObject("Clouds");
+            cloudsGo.transform.SetParent(city.transform, false);
+            var clouds = cloudsGo.AddComponent<CloudLayer>();
+            SetField(clouds, "game", game);
+            SetField(clouds, "cloudPrefab", content.CloudPrefab);
+
+            var presentation = new GameObject("Presentation");
+            var dayNight = presentation.AddComponent<DayNightCycle>();
+            SetField(dayNight, "game", game);
+            SetField(dayNight, "sun", sun);
+            SetField(dayNight, "windowLitTemplate", ContentBuilder.WindowLit);
+
+            var audio = presentation.AddComponent<AudioDirector>();
+            SetField(audio, "game", game);
+            SetField(audio, "toolbar", toolbar);
+            SetField(audio, "dayNight", dayNight);
+            foreach (string clip in new[] { "ambientDay:ambient_day", "ambientNight:ambient_night", "windLoop:wind_loop", "buildClick:build_click", "selectTick:select_tick", "errorBuzz:error_buzz", "dawnChime:dawn_chime", "duskPad:dusk_pad", "blackout:blackout", "restored:restored", "resultsChord:results_chord" })
+            {
+                string[] parts = clip.Split(':');
+                SetField(audio, parts[0], AssetDatabase.LoadAssetAtPath<AudioClip>(Root + "/Audio/" + parts[1] + ".wav"));
+            }
+
+            var tutorialGo = new GameObject("Tutorial");
+            var tutorial = tutorialGo.AddComponent<TutorialDirector>();
+            SetField(tutorial, "game", game);
+            SetField(tutorial, "toolbar", toolbar);
+
             CreateUI(placement, game, toolbar);
+            var hintView = Object.FindAnyObjectByType<UIDocument>().gameObject.AddComponent<TutorialHintView>();
+            SetField(hintView, "tutorial", tutorial);
 
             EditorSceneManager.SaveScene(scene, ScenePath);
             EditorBuildSettings.scenes = new[] { new EditorBuildSettingsScene(ScenePath, true) };
@@ -109,7 +140,7 @@ namespace GridKeeper.EditorTools
             Debug.Log("[Grid Keeper] Main scene built at " + ScenePath);
         }
 
-        private static void CreateLight()
+        private static Light CreateLight()
         {
             var go = new GameObject("Sun");
             var light = go.AddComponent<Light>();
@@ -119,6 +150,7 @@ namespace GridKeeper.EditorTools
             light.shadows = LightShadows.Soft;
             light.shadowStrength = 0.6f;
             go.transform.rotation = Quaternion.Euler(52f, -35f, 0f);
+            return light;
         }
 
         private static PlacementReticle CreateReticle(Material material)
@@ -182,7 +214,7 @@ namespace GridKeeper.EditorTools
 
             panel.themeStyleSheet = theme;
             panel.scaleMode = PanelScaleMode.ScaleWithScreenSize;
-            panel.referenceResolution = new Vector2Int(828, 1792);
+            panel.referenceResolution = new Vector2Int(750, 1624);
             panel.screenMatchMode = PanelScreenMatchMode.MatchWidthOrHeight;
             panel.match = 0.5f;
             EditorUtility.SetDirty(panel);
