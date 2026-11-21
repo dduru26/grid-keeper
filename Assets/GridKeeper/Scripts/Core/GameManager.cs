@@ -47,6 +47,7 @@ namespace GridKeeper.Core
         public ShiftStats Stats { get; } = new ShiftStats();
         public TickResult LastTick { get; private set; }
         public bool InBlackout { get; private set; }
+        public bool IsHeld => holds > 0;
         public ShiftResult LastResult { get; private set; }
 
         public GameState State { get; private set; }
@@ -59,6 +60,17 @@ namespace GridKeeper.Core
         public ResultsState Results { get; private set; }
 
         private readonly EnergyGrid grid = new EnergyGrid();
+        private int holds;
+
+        public void Hold()
+        {
+            holds++;
+        }
+
+        public void Release()
+        {
+            holds = Mathf.Max(0, holds - 1);
+        }
 
         private void Awake()
         {
@@ -136,6 +148,7 @@ namespace GridKeeper.Core
 
         public void PrepareShift()
         {
+            holds = 0;
             Clock = CreateClock();
             Stats.Reset();
             weather.Generate(balance.shiftDays);

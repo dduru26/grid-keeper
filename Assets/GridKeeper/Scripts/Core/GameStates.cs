@@ -60,6 +60,7 @@ namespace GridKeeper.Core
 
         public override void Tick(float deltaTime)
         {
+            if (Game.IsHeld) return;
             Game.Simulate(deltaTime);
             if (Game.Clock.IsFinished) Game.ChangeState(Game.Results);
         }
