@@ -125,13 +125,19 @@ namespace GridKeeper.EditorTools
                 SetField(audio, parts[0], AssetDatabase.LoadAssetAtPath<AudioClip>(Root + "/Audio/" + parts[1] + ".wav"));
             }
 
+            var perf = gameGo.AddComponent<PerformanceBootstrap>();
+            SetField(perf, "placement", placement);
+            SetField(perf, "staticRoot", city.transform.Find("Board"));
+
             var tutorialGo = new GameObject("Tutorial");
             var tutorial = tutorialGo.AddComponent<TutorialDirector>();
             SetField(tutorial, "game", game);
             SetField(tutorial, "toolbar", toolbar);
 
             CreateUI(placement, game, toolbar);
-            var hintView = Object.FindAnyObjectByType<UIDocument>().gameObject.AddComponent<TutorialHintView>();
+            GameObject uiGo = Object.FindAnyObjectByType<UIDocument>().gameObject;
+            uiGo.AddComponent<FrameRateView>();
+            var hintView = uiGo.AddComponent<TutorialHintView>();
             SetField(hintView, "tutorial", tutorial);
 
             EditorSceneManager.SaveScene(scene, ScenePath);

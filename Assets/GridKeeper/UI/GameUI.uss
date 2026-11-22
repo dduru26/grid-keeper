@@ -568,3 +568,19 @@
     width: 70%;
     margin-bottom: 14px;
 }
+
+.fps {
+    position: absolute;
+    left: 28px;
+    bottom: 220px;
+    font-size: 17px;
+    color: rgb(120, 230, 160);
+    background-color: rgba(0, 0, 0, 0.55);
+    border-radius: 8px;
+    padding: 4px 8px;
+    -unity-font-definition: url("project://database/Assets/GridKeeper/Fonts/JetBrainsMono-Bold.ttf");
+}
+
+.fps--low {
+    color: rgb(255, 140, 120);
+}

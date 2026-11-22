@@ -1,6 +1,7 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements">
     <Style src="project://database/Assets/GridKeeper/UI/GameUI.uss" />
     <ui:VisualElement name="root" class="gk-root" picking-mode="Ignore">
+        <ui:Label name="fps" text="60 FPS" class="fps hidden" picking-mode="Ignore" />
         <ui:VisualElement name="blackout-edge" class="blackout-edge" picking-mode="Ignore" />
         <ui:VisualElement name="hud" class="hud hidden" picking-mode="Ignore">
             <ui:VisualElement class="hud__row" picking-mode="Ignore">
