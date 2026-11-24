@@ -111,7 +111,7 @@ namespace GridKeeper.UI
 
         private void Start()
         {
-            if (game == null) game = FindAnyObjectByType<GameManager>();
+            Require.Reference(this, game, nameof(game));
             VisualElement root = GetComponent<UIDocument>().rootVisualElement;
             briefing = root.Q<VisualElement>("briefing");
             pause = root.Q<VisualElement>("pause");

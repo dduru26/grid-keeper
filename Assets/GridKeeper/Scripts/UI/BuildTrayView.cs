@@ -20,8 +20,8 @@ namespace GridKeeper.UI
 
         private void Start()
         {
-            if (toolbar == null) toolbar = FindAnyObjectByType<BuildToolbar>();
-            if (game == null) game = FindAnyObjectByType<GameManager>();
+            Require.Reference(this, toolbar, nameof(toolbar));
+            Require.Reference(this, game, nameof(game));
 
             VisualElement root = GetComponent<UIDocument>().rootVisualElement;
             hint = root.Q<Label>("build-hint");

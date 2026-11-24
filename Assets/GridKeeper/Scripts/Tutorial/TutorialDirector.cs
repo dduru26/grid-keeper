@@ -54,8 +54,8 @@ namespace GridKeeper.Tutorial
 
         private void Awake()
         {
-            if (game == null) game = FindAnyObjectByType<GameManager>();
-            if (toolbar == null) toolbar = FindAnyObjectByType<BuildToolbar>();
+            Require.Reference(this, game, nameof(game));
+            Require.Reference(this, toolbar, nameof(toolbar));
         }
 
         private void OnEnable()

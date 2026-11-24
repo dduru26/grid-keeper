@@ -19,7 +19,7 @@ namespace GridKeeper.Interaction
 
         private void Awake()
         {
-            if (placement == null) placement = FindAnyObjectByType<ARPlacementController>();
+            Require.Reference(this, placement, nameof(placement));
         }
 
         private void Update()

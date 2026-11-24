@@ -18,7 +18,7 @@ namespace GridKeeper.Core
             QualitySettings.vSyncCount = 0;
             Application.targetFrameRate = targetFrameRate;
             Screen.sleepTimeout = SleepTimeout.NeverSleep;
-            if (placement == null) placement = FindAnyObjectByType<ARPlacementController>();
+            Require.Reference(this, placement, nameof(placement));
         }
 
         private void OnEnable()

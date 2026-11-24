@@ -51,16 +51,8 @@ namespace GridKeeper.AR
             XROrigin origin = GetComponent<XROrigin>();
             arCamera = origin != null && origin.Camera != null ? origin.Camera : Camera.main;
 
-            if (cityRoot == null)
-            {
-                GameObject found = GameObject.Find("Brightwater");
-                if (found != null) cityRoot = found.transform;
-            }
-
-            if (reticle == null)
-            {
-                reticle = FindAnyObjectByType<PlacementReticle>(FindObjectsInactive.Include);
-            }
+            Require.Reference(this, cityRoot, nameof(cityRoot));
+            Require.Reference(this, reticle, nameof(reticle));
 
             if (cityRoot != null) cityRoot.gameObject.SetActive(false);
         }

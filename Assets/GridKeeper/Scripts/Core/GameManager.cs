@@ -107,11 +107,11 @@ namespace GridKeeper.Core
 
         private void Awake()
         {
-            if (city == null) city = FindAnyObjectByType<City>(FindObjectsInactive.Include);
-            if (placement == null) placement = FindAnyObjectByType<ARPlacementController>();
-            if (weather == null) weather = FindAnyObjectByType<WeatherSystem>();
-            if (factory == null) factory = FindAnyObjectByType<SourceFactory>();
-            if (toolbar == null) toolbar = FindAnyObjectByType<BuildToolbar>();
+            Require.Reference(this, city, nameof(city));
+            Require.Reference(this, placement, nameof(placement));
+            Require.Reference(this, weather, nameof(weather));
+            Require.Reference(this, factory, nameof(factory));
+            Require.Reference(this, toolbar, nameof(toolbar));
 
             Wallet = new Wallet(balance.startingBudget);
             run = new RunSimulation(balance, city, weather);

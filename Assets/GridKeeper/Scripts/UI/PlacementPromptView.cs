@@ -20,7 +20,7 @@ namespace GridKeeper.UI
             prompt = root.Q<VisualElement>("placement-prompt");
             label = root.Q<Label>("prompt-text");
 
-            if (placement == null) placement = FindAnyObjectByType<ARPlacementController>();
+            Require.Reference(this, placement, nameof(placement));
             if (placement == null) return;
 
             placement.StateChanged += Render;

@@ -45,7 +45,7 @@ namespace GridKeeper.UI
 
         private void Start()
         {
-            if (game == null) game = FindAnyObjectByType<GameManager>();
+            Require.Reference(this, game, nameof(game));
             VisualElement root = GetComponent<UIDocument>().rootVisualElement;
             hud = root.Q<VisualElement>("hud");
             day = root.Q<Label>("clock-day");

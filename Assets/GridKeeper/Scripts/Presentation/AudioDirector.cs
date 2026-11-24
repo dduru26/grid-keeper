@@ -39,9 +39,9 @@ namespace GridKeeper.Presentation
 
         private void Awake()
         {
-            if (game == null) game = FindAnyObjectByType<GameManager>();
-            if (toolbar == null) toolbar = FindAnyObjectByType<BuildToolbar>();
-            if (dayNight == null) dayNight = FindAnyObjectByType<DayNightCycle>();
+            Require.Reference(this, game, nameof(game));
+            Require.Reference(this, toolbar, nameof(toolbar));
+            Require.Reference(this, dayNight, nameof(dayNight));
 
             daySource = CreateLoop("Ambient Day", ambientDay);
             nightSource = CreateLoop("Ambient Night", ambientNight);

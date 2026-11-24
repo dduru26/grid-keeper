@@ -32,7 +32,7 @@ namespace GridKeeper.Presentation
 
         private void Awake()
         {
-            if (game == null) game = FindAnyObjectByType<GameManager>();
+            Require.Reference(this, game, nameof(game));
             RenderSettings.ambientMode = AmbientMode.Flat;
 
             if (windowLitTemplate != null)

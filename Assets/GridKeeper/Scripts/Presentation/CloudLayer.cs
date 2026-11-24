@@ -20,7 +20,7 @@ namespace GridKeeper.Presentation
 
         private void Start()
         {
-            if (game == null) game = FindAnyObjectByType<GameManager>();
+            Require.Reference(this, game, nameof(game));
             clouds = new Transform[count];
             lanes = new float[count];
             offsets = new float[count];

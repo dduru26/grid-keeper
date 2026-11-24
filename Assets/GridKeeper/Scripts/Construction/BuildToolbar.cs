@@ -53,11 +53,11 @@ namespace GridKeeper.Construction
 
         private void Awake()
         {
-            if (game == null) game = FindAnyObjectByType<GameManager>();
-            if (placement == null) placement = FindAnyObjectByType<ARPlacementController>();
+            Require.Reference(this, game, nameof(game));
+            Require.Reference(this, placement, nameof(placement));
             if (factory == null) factory = GetComponent<SourceFactory>();
             if (ghost == null) ghost = GetComponentInChildren<GhostPreview>(true);
-            if (pinch == null) pinch = FindAnyObjectByType<PinchToScale>();
+            Require.Reference(this, pinch, nameof(pinch));
             cam = Camera.main;
         }
 

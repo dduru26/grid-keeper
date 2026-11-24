@@ -14,7 +14,7 @@ namespace GridKeeper.UI
 
         private void Start()
         {
-            if (tutorial == null) tutorial = FindAnyObjectByType<TutorialDirector>();
+            Require.Reference(this, tutorial, nameof(tutorial));
             VisualElement root = GetComponent<UIDocument>().rootVisualElement;
             bubble = root.Q<VisualElement>("tutorial-hint");
             text = root.Q<Label>("tutorial-text");

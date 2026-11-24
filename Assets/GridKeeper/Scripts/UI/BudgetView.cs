@@ -16,7 +16,7 @@ namespace GridKeeper.UI
             VisualElement root = GetComponent<UIDocument>().rootVisualElement;
             value = root.Q<Label>("budget-value");
 
-            if (game == null) game = FindAnyObjectByType<GameManager>();
+            Require.Reference(this, game, nameof(game));
 
             game.Wallet.Changed += Render;
             Render(game.Wallet.Balance);
