@@ -72,22 +72,23 @@ For a phone-shaped view, switch the Game view to **Simulator** and choose **iOS 
 Assets/GridKeeper
 ├── Audio            Generated loops and cues plus CC0 Kenney sounds (see CREDITS.md)
 ├── Data             ScriptableObject assets for sources, buildings, weather, balance and layout
-├── Editor           Content, board, scene, performance and build tools
+├── Editor           Content, board, scene, performance and build tools (GridKeeper.Editor assembly)
 ├── Fonts            Bricolage Grotesque, Instrument Sans, JetBrains Mono (OFL)
 ├── Prefabs          Generated low-poly sources, buildings, clouds and smoke
 ├── Scenes           Main.unity
-├── Scripts
+├── Scripts          Game code (GridKeeper.Runtime assembly)
 │   ├── AR            Plane placement and reticle
 │   ├── Construction  Build toolbar, ghost preview and source factory
-│   ├── Core          GameManager, game states, wallet, performance bootstrap
+│   ├── Core          GameManager, game states, wallet, Require, performance bootstrap
 │   ├── Data          ScriptableObject types
-│   ├── Energy        Placeable, PowerSource, SolarPanel, WindTurbine, Battery
+│   ├── Energy        IGenerator, IStorage, Placeable, PowerSource, SolarPanel, WindTurbine, Battery, BatteryStore
 │   ├── Interaction   Pointer input, pinch to scale, haptics
 │   ├── Presentation  Day and night, audio, clouds, smoke
-│   ├── Simulation    Clock, weather, energy grid, shift stats
+│   ├── Simulation    RunSimulation, RunRules, clock, weather, energy grid, stats
 │   ├── Tutorial      Tutorial director
 │   ├── UI            UI Toolkit views and the shift chart
 │   └── World         City, Tile, Building
+├── Tests/EditMode   24 Edit Mode tests (GridKeeper.Tests.EditMode assembly)
 └── UI               UXML, USS, theme and panel settings
 Assets/Plugins/iOS   Native haptics (UIKit feedback generators)
 Tools                make_audio.py, the generator for the sounds made in code
@@ -98,12 +99,18 @@ Tools                make_audio.py, the generator for the sounds made in code
 | Pattern or principle | Where |
 |---|---|
 | State | `GameState` with `PlacingState`, `BriefingState`, `PlayingState`, `PausedState` and `ResultsState`, driven by `GameManager` |
-| Strategy and polymorphism | `PowerSource` is abstract. `SolarPanel` and `WindTurbine` each supply their own output rule. `EnergyGrid` works with any `Placeable` |
+| Inheritance and polymorphism | `PowerSource` is abstract. `SolarPanel` and `WindTurbine` each supply their own output rule |
+| Interfaces (dependency inversion) | `EnergyGrid` only knows `IGenerator` and `IStorage`, so a new source type needs no change to the grid, and the tests can use fakes |
 | Factory | `SourceFactory` creates and removes sources, so the toolbar never instantiates prefabs itself |
 | Observer | C# events (`Ticked`, `PhaseChanged`, `BlackoutChanged`, `DayCompleted`, `ShiftEnded`, `Built`, `CityPlaced`) drive the UI, audio and tutorial without them polling the game |
 | Data-driven design (open/closed) | Every tuning value lives in ScriptableObjects (`BalanceConfig`, `PlaceableDefinition`, `BuildingDefinition`, `WeatherProfile`, `CityLayout`), so balance changes need no code changes |
-| Single responsibility | `EnergyGrid` only balances a tick, `GameClock` only keeps time, the views only render |
-| Encapsulation | `Battery` owns its stored energy and rate limits, and `Wallet` owns the money |
+| Single responsibility | `RunSimulation` runs the simulation as a plain C# class, `RunRules` holds the day rules, `EnergyGrid` only balances a tick, `GameClock` only keeps time, `GameManager` only runs the game flow, the views only render |
+| Explicit dependencies | References are wired in the Inspector by the scene builder. `Require.Reference` logs a clear error if one is missing, instead of searching the scene |
+| Encapsulation | `BatteryStore` owns its stored energy and the 8 MW per-tick rate, and `Wallet` owns the money |
+
+## Tests
+
+Open **Window › General › Test Runner**, choose **EditMode** and press **Run All**. 24 tests cover the energy grid, batteries, solar output, the clock, grades, day bonuses and lives, demand growth, stats, the wallet and the endless forecast.
 
 ## Performance
 
