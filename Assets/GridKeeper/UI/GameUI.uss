@@ -736,3 +736,38 @@
     border-radius: 6px;
     background-color: rgb(92, 191, 115);
 }
+
+.results__score {
+    flex-direction: row;
+    margin: 6px 0 14px 0;
+}
+
+.results__score-block {
+    flex-grow: 1;
+    flex-basis: 0;
+    background-color: rgba(255, 255, 255, 0.06);
+    border-radius: 20px;
+    padding: 14px 18px;
+    margin-right: 10px;
+}
+
+.results__score-caption {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 20px;
+    -unity-font-style: bold;
+    letter-spacing: 2px;
+    margin: 0;
+    padding: 0;
+}
+
+.results__score-caption--new {
+    color: rgb(242, 165, 22);
+}
+
+.results__score-value {
+    color: rgb(255, 255, 255);
+    font-size: 40px;
+    -unity-font-style: bold;
+    margin: 0;
+    padding: 0;
+}

@@ -37,6 +37,12 @@ namespace GridKeeper.UI
         private int card;
         private bool storyMode;
         private bool briefingShown;
+        private string bestLine;
+        private Label resultsEyebrow;
+        private Label resultsScore;
+        private Label resultsBest;
+        private Label resultsBestCaption;
+        private Label resultsDays;
 
         private static readonly Color Solar = new Color(0.949f, 0.647f, 0.086f);
         private static readonly Color Wind = new Color(0.063f, 0.627f, 0.639f);
@@ -63,12 +69,12 @@ namespace GridKeeper.UI
             new StoryCard
             {
                 Eyebrow = "YOUR GOAL",
-                Title = "Keep the lights on for 3 days.",
-                Body = "Each day the town needs power. The more of that need you meet, the higher your grade at the end.",
+                Title = "Keep the lights on as long as you can.",
+                Body = "The days never stop, and the town needs a little more power every day. Every hour you power earns points.",
                 Rows = new[]
                 {
-                    (new Color(0.36f, 0.75f, 0.45f), "Meet 90% or more for an A", false),
-                    (Dark, "Too little power means blackouts", false)
+                    (new Color(0.36f, 0.75f, 0.45f), "Meet 90% of a day's need for a big bonus", false),
+                    (Dark, "A day mostly in the dark costs a life. Lose 3 and the run ends", false)
                 }
             },
             new StoryCard
@@ -99,7 +105,7 @@ namespace GridKeeper.UI
             {
                 Eyebrow = "WATCH THE SKY",
                 Title = "The weather changes every day.",
-                Body = "Clouds cut solar. Wind comes and goes. A heatwave makes the town hungrier. Check the forecast each morning and plan ahead."
+                Body = "Every day gets random weather. Clouds cut solar, wind comes and goes, and a heatwave makes the town hungrier. Check tomorrow's forecast and plan ahead."
             }
         };
 
@@ -137,6 +143,12 @@ namespace GridKeeper.UI
             skipButton.clicked += SkipStory;
             root.Q<Button>("resume-button").clicked += game.TogglePause;
             root.Q<Button>("restart-button").clicked += game.Restart;
+            root.Q<Button>("end-run-button").clicked += game.EndRun;
+            resultsEyebrow = root.Q<Label>("results-eyebrow");
+            resultsScore = root.Q<Label>("results-score");
+            resultsBest = root.Q<Label>("results-best");
+            resultsBestCaption = root.Q<Label>("results-best-caption");
+            resultsDays = root.Q<Label>("results-days");
             root.Q<Button>("again-button").clicked += game.Restart;
 
             game.PhaseChanged += Render;
@@ -192,8 +204,10 @@ namespace GridKeeper.UI
             {
                 briefingEyebrow.text = "A MESSAGE FROM THE COUNCIL";
                 briefingTitle.text = "Welcome, Keeper.";
-                briefingBody.text = "Houses need light at night, the factory runs in working hours and the hospital can never go dark. Here is the forecast for your 3 days.";
+                briefingBody.text = "Houses need light at night, the factory runs in working hours and the hospital can never go dark. Here is the forecast for today and tomorrow. How long can you last?";
                 planButton.text = "Plan the grid";
+                bestLine = GameManager.BestScore > 0 ? " Your best score is " + GameManager.BestScore.ToString("N0") + "." : string.Empty;
+                briefingBody.text += bestLine;
                 RenderBriefingForecast();
                 return;
             }
@@ -249,16 +263,16 @@ namespace GridKeeper.UI
         private void RenderBriefingForecast()
         {
             briefingForecast.Clear();
-            for (int i = 0; i < game.Weather.Forecast.Count; i++)
+            for (int i = 0; i < 2; i++)
             {
-                WeatherProfile profile = game.Weather.Forecast[i];
+                WeatherProfile profile = game.Weather.ForDay(i);
                 var chip = new VisualElement();
                 chip.AddToClassList("forecast__chip");
                 chip.style.marginBottom = 8;
                 var swatch = new VisualElement();
                 swatch.AddToClassList("forecast__swatch");
                 swatch.style.backgroundColor = profile.Tint;
-                var label = new Label("Day " + (i + 1) + ": " + profile.Label);
+                var label = new Label((i == 0 ? "Today: " : "Tomorrow: ") + profile.Label);
                 label.AddToClassList("forecast__text");
                 chip.Add(swatch);
                 chip.Add(label);
@@ -272,12 +286,20 @@ namespace GridKeeper.UI
             grade.text = result.Grade.ToString();
             grade.EnableInClassList("grade--D", result.Grade == Grade.D);
             share.text = Mathf.RoundToInt(result.ShareMet * 100f) + "% of demand met";
+            int days = stats.DaysCompleted;
+            resultsEyebrow.text = game.StrikesLeft <= 0 ? "THE LIGHTS WENT OUT" : "RUN ENDED";
+            resultsScore.text = stats.Score.ToString("N0");
+            resultsBest.text = result.BestScore.ToString("N0");
+            resultsBestCaption.text = result.NewBest ? "NEW BEST" : "BEST";
+            resultsBestCaption.EnableInClassList("results__score-caption--new", result.NewBest);
+            resultsDays.text = days + (days == 1 ? " day" : " days");
             note.text = result.CouncilNote;
             delivered.text = stats.DeliveredMWh.ToString("0") + " of " + stats.DemandMWh.ToString("0") + " MWh";
             blackout.text = stats.BlackoutHours.ToString("0.0") + " h";
             wasted.text = stats.WastedMWh.ToString("0") + " MWh";
             earned.text = "$" + stats.Earned.ToString("N0");
-            chart.SetData(stats.Samples, game.Clock.TotalHours, game.Clock.TotalHours, false);
+            float shown = Mathf.Clamp(game.Clock.ElapsedHours, 24f, 72f);
+            chart.SetData(stats.Samples, shown, game.Clock.ElapsedHours, true);
         }
     }
 }

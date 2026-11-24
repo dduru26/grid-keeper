@@ -15,13 +15,37 @@ namespace GridKeeper.Core
         public readonly float ShareMet;
         public readonly string CouncilNote;
         public readonly ShiftStats Stats;
+        public readonly int BestScore;
+        public readonly bool NewBest;
 
-        public ShiftResult(Grade grade, float shareMet, string note, ShiftStats stats)
+        public ShiftResult(Grade grade, float shareMet, string note, ShiftStats stats, int bestScore, bool newBest)
         {
             Grade = grade;
             ShareMet = shareMet;
             CouncilNote = note;
             Stats = stats;
+            BestScore = bestScore;
+            NewBest = newBest;
+        }
+    }
+
+    public readonly struct DayReport
+    {
+        public readonly int Day;
+        public readonly Grade Grade;
+        public readonly float ShareMet;
+        public readonly int Bonus;
+        public readonly bool Strike;
+        public readonly int StrikesLeft;
+
+        public DayReport(int day, Grade grade, float shareMet, int bonus, bool strike, int strikesLeft)
+        {
+            Day = day;
+            Grade = grade;
+            ShareMet = shareMet;
+            Bonus = bonus;
+            Strike = strike;
+            StrikesLeft = strikesLeft;
         }
     }
 
@@ -38,6 +62,13 @@ namespace GridKeeper.Core
         public event Action<TickResult> Ticked;
         public event Action<bool> BlackoutChanged;
         public event Action<ShiftResult> ShiftEnded;
+        public event Action<DayReport> DayCompleted;
+
+        private const string BestScoreKey = "gk.best.score";
+
+        public static int BestScore => PlayerPrefs.GetInt(BestScoreKey, 0);
+        public int StrikesLeft => Mathf.Max(0, balance.strikesAllowed - Stats.Strikes);
+        public bool RunOver => endRequested || StrikesLeft <= 0;
 
         public BalanceConfig Balance => balance;
         public City City => city;
@@ -61,6 +92,11 @@ namespace GridKeeper.Core
 
         private readonly EnergyGrid grid = new EnergyGrid();
         private int holds;
+        private bool endRequested;
+        private int trackedDay;
+        private float dayDemandMWh;
+        private float dayDeliveredMWh;
+        private float pointRemainder;
 
         public void Hold()
         {
@@ -133,6 +169,13 @@ namespace GridKeeper.Core
             else if (State == Paused) ChangeState(Playing);
         }
 
+        public void EndRun()
+        {
+            if (State != Playing && State != Paused) return;
+            endRequested = true;
+            ChangeState(Results);
+        }
+
         public void Restart()
         {
             if (State == Placing) return;
@@ -151,7 +194,10 @@ namespace GridKeeper.Core
             holds = 0;
             Clock = CreateClock();
             Stats.Reset();
-            weather.Generate(balance.shiftDays);
+            weather.Generate();
+            endRequested = false;
+            trackedDay = 0;
+            dayDemandMWh = dayDeliveredMWh = pointRemainder = 0f;
             LastTick = default;
             SetBlackout(false);
             city.LightAll();
@@ -161,7 +207,7 @@ namespace GridKeeper.Core
         public void Simulate(float deltaTime)
         {
             int ticks = Clock.Advance(deltaTime);
-            for (int i = 0; i < ticks; i++)
+            for (int i = 0; i < ticks && !RunOver; i++)
             {
                 float elapsedAtTickStart = Clock.ElapsedHours - (ticks - i) * Clock.TickHours;
                 RunTick(Mathf.Max(0f, elapsedAtTickStart));
@@ -171,7 +217,15 @@ namespace GridKeeper.Core
         public void FinishShift()
         {
             Grade grade = GradeTable.Evaluate(Stats.ShareMet, balance.gradeA, balance.gradeB, balance.gradeC);
-            LastResult = new ShiftResult(grade, Stats.ShareMet, GradeTable.CouncilNote(grade), Stats);
+            int best = BestScore;
+            bool newBest = Stats.Score > best;
+            if (newBest)
+            {
+                best = Stats.Score;
+                PlayerPrefs.SetInt(BestScoreKey, best);
+                PlayerPrefs.Save();
+            }
+            LastResult = new ShiftResult(grade, Stats.ShareMet, GradeTable.CouncilNote(grade), Stats, best, newBest);
             SetBlackout(false);
             ShiftEnded?.Invoke(LastResult);
         }
@@ -179,9 +233,11 @@ namespace GridKeeper.Core
         private void RunTick(float elapsedHours)
         {
             float hours = Clock.TickHours;
+            int dayIndex = Mathf.FloorToInt(elapsedHours / 24f);
+            if (dayIndex > trackedDay) CloseDay();
             float hourOfDay = Mathf.Repeat(balance.startHour + elapsedHours, 24f);
             WeatherSample sample = weather.Sample(elapsedHours);
-            float multiplier = sample.heatwave ? balance.heatwaveDemandFactor : 1f;
+            float multiplier = DemandMultiplier(dayIndex, sample.heatwave);
             float demand = city.DemandAt(hourOfDay, multiplier);
 
             TickResult result = grid.Balance(demand, city.Placeables, hourOfDay, sample, hours);
@@ -190,6 +246,15 @@ namespace GridKeeper.Core
             float earned = result.DeliveredMW * hours * balance.revenuePerMWh;
             Wallet.Add(earned);
             Stats.Record(result, hours, earned);
+            dayDemandMWh += result.DemandMW * hours;
+            dayDeliveredMWh += result.DeliveredMW * hours;
+            pointRemainder += result.DeliveredMW * hours * balance.pointsPerMWh;
+            int points = Mathf.FloorToInt(pointRemainder);
+            if (points > 0)
+            {
+                pointRemainder -= points;
+                Stats.AddPoints(points);
+            }
 
             city.ApplySupply(result.DeliveredMW, hourOfDay, multiplier);
             SetBlackout(result.IsBlackout);
@@ -198,11 +263,30 @@ namespace GridKeeper.Core
             Ticked?.Invoke(result);
         }
 
+        public float DemandMultiplier(int dayIndex, bool heatwaveDay)
+        {
+            float growth = Mathf.Min(balance.maxDemandGrowth, 1f + balance.demandGrowthPerDay * dayIndex);
+            return growth * (heatwaveDay ? balance.heatwaveDemandFactor : 1f);
+        }
+
+        private void CloseDay()
+        {
+            float share = dayDemandMWh <= 0f ? 1f : Mathf.Clamp01(dayDeliveredMWh / dayDemandMWh);
+            Grade grade = GradeTable.Evaluate(share, balance.gradeA, balance.gradeB, balance.gradeC);
+            int bonus = grade == Grade.A ? balance.dayBonusA : grade == Grade.B ? balance.dayBonusB : grade == Grade.C ? balance.dayBonusC : 0;
+            bool strike = grade == Grade.D;
+            Stats.AddPoints(bonus);
+            Stats.CompleteDay(grade, strike);
+            trackedDay++;
+            dayDemandMWh = dayDeliveredMWh = 0f;
+            DayCompleted?.Invoke(new DayReport(trackedDay, grade, share, bonus, strike, StrikesLeft));
+        }
+
         private void Preview()
         {
             WeatherSample sample = weather.Sample(0f);
             float hourOfDay = balance.startHour;
-            float multiplier = sample.heatwave ? balance.heatwaveDemandFactor : 1f;
+            float multiplier = DemandMultiplier(0, sample.heatwave);
             var preview = new TickResult
             {
                 HourOfDay = hourOfDay,
@@ -233,7 +317,7 @@ namespace GridKeeper.Core
 
         private GameClock CreateClock()
         {
-            return new GameClock(balance.startHour, balance.shiftDays, balance.shiftSeconds, balance.tickHours);
+            return new GameClock(balance.startHour, balance.secondsPerDay, balance.tickHours);
         }
     }
 }

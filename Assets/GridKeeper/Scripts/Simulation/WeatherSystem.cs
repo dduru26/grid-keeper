@@ -25,31 +25,40 @@ namespace GridKeeper.Simulation
         private float noiseOffset;
         private int currentDay = -1;
 
-        public void Generate(int days)
+        public void Generate()
         {
             int seed = fixedSeed != 0 ? fixedSeed : Environment.TickCount;
             random = new System.Random(seed);
             noiseOffset = (float)random.NextDouble() * 100f;
             currentDay = -1;
-
             forecast.Clear();
-            for (int day = 0; day < days; day++)
-            {
-                forecast.Add(PickFor(day, days));
-            }
+            EnsureForecast(1);
         }
 
-        private WeatherProfile PickFor(int day, int days)
+        private void EnsureForecast(int dayIndex)
+        {
+            if (random == null) random = new System.Random(Environment.TickCount);
+            while (forecast.Count <= dayIndex) forecast.Add(PickFor(forecast.Count));
+        }
+
+        private WeatherProfile PickFor(int day)
         {
             if (day == 0) return clear;
-            if (day == days - 1) return random.NextDouble() < 0.7 ? heatwave : windy;
-            return random.NextDouble() < 0.5 ? cloudy : windy;
+            WeatherProfile previous = forecast[day - 1];
+            double roll = random.NextDouble();
+            double heatChance = day < 2 || previous == heatwave ? 0.0 : 0.2;
+            if (roll < heatChance) return heatwave;
+            roll = random.NextDouble();
+            if (roll < 0.3) return clear;
+            if (roll < 0.65) return cloudy;
+            return windy;
         }
 
         public WeatherProfile ForDay(int dayIndex)
         {
-            if (forecast.Count == 0) return clear;
-            return forecast[Mathf.Clamp(dayIndex, 0, forecast.Count - 1)];
+            dayIndex = Mathf.Max(0, dayIndex);
+            EnsureForecast(dayIndex + 1);
+            return forecast[dayIndex];
         }
 
         public WeatherSample Sample(float elapsedHours)
@@ -57,7 +66,7 @@ namespace GridKeeper.Simulation
             int dayIndex = Mathf.FloorToInt(elapsedHours / 24f);
             WeatherProfile profile = ForDay(dayIndex);
 
-            if (dayIndex != currentDay && dayIndex < forecast.Count)
+            if (dayIndex != currentDay)
             {
                 currentDay = dayIndex;
                 DayStarted?.Invoke(dayIndex + 1, profile);

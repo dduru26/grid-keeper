@@ -11,8 +11,7 @@ namespace GridKeeper.Data
         [Min(0f)] public float revenuePerMWh = 3f;
 
         [Header("Shift")]
-        [Min(10f)] public float shiftSeconds = 120f;
-        [Range(1, 7)] public int shiftDays = 3;
+        [Min(5f)] public float secondsPerDay = 40f;
         [Range(0f, 23f)] public float startHour = 6f;
         [Range(0.05f, 1f)] public float tickHours = 0.25f;
 
@@ -30,6 +29,15 @@ namespace GridKeeper.Data
 
         [Header("Demand")]
         [Min(1f)] public float heatwaveDemandFactor = 1.3f;
+        [Range(0f, 0.2f)] public float demandGrowthPerDay = 0.04f;
+        [Min(1f)] public float maxDemandGrowth = 2f;
+
+        [Header("Endless run")]
+        [Min(1)] public int strikesAllowed = 3;
+        [Min(0f)] public float pointsPerMWh = 10f;
+        [Min(0)] public int dayBonusA = 300;
+        [Min(0)] public int dayBonusB = 150;
+        [Min(0)] public int dayBonusC = 50;
 
         [Header("Table")]
         [Min(0.1f)] public float minCityScale = 0.5f;

@@ -35,8 +35,9 @@ namespace GridKeeper.UI
         private VisualElement meterFill;
         private string shownStatus;
         private int shownMeter = -1;
-        private int shownShare = -1;
+        private int shownScore = -1;
         private float bannerTimer;
+        private string pendingDayBanner;
         private int shownSupply = -1;
         private int shownDemand = -1;
         private int shownStored = -2;
@@ -73,6 +74,7 @@ namespace GridKeeper.UI
             game.PhaseChanged += OnPhase;
             game.Ticked += OnTick;
             game.Weather.DayStarted += OnDayStarted;
+            game.DayCompleted += OnDayCompleted;
             OnPhase(game.Phase);
         }
 
@@ -82,6 +84,7 @@ namespace GridKeeper.UI
             game.PhaseChanged -= OnPhase;
             game.Ticked -= OnTick;
             if (game.Weather != null) game.Weather.DayStarted -= OnDayStarted;
+            game.DayCompleted -= OnDayCompleted;
         }
 
         private void OnPhase(GamePhase phase)
@@ -91,9 +94,10 @@ namespace GridKeeper.UI
             {
                 shownMinute = shownSupply = shownDemand = -1;
                 shownStored = -2;
-                shownMeter = shownShare = -1;
+                shownMeter = -1;
                 SetStatus("ready", "PLAN YOUR GRID");
-                statusGrade.text = "GRADE --";
+                statusGrade.text = "SCORE 0";
+                shownScore = -1;
                 meterFill.style.width = Length.Percent(0f);
                 RenderClock();
                 RenderForecast(0);
@@ -153,14 +157,35 @@ namespace GridKeeper.UI
                 meterFill.style.backgroundColor = meter >= 98 ? new Color(0.36f, 0.75f, 0.45f) : meter >= 75 ? new Color(0.949f, 0.647f, 0.086f) : new Color(0.84f, 0.27f, 0.23f);
             }
 
-            int share = Mathf.RoundToInt(game.Stats.ShareMet * 100f);
-            if (share != shownShare)
-            {
-                shownShare = share;
-                BalanceConfig b = game.Balance;
-                Grade grade = GradeTable.Evaluate(game.Stats.ShareMet, b.gradeA, b.gradeB, b.gradeC);
-                statusGrade.text = "GRADE " + grade + " · " + share + "%";
-            }
+            RenderScore();
+        }
+
+        private void RenderScore()
+        {
+            int score = game.Stats.Score;
+            if (score == shownScore) return;
+            shownScore = score;
+            statusGrade.text = "SCORE " + score.ToString("N0");
+        }
+
+        private void OnDayCompleted(DayReport report)
+        {
+            RenderScore();
+            shownMinute = -1;
+            RenderClock();
+            string text = report.Strike
+                ? "Day " + report.Day + " went dark · " + report.StrikesLeft + (report.StrikesLeft == 1 ? " life left" : " lives left")
+                : "Day " + report.Day + " grade " + report.Grade + " · +" + report.Bonus + " bonus";
+            ShowBanner(text);
+        }
+
+        private void ShowBanner(string text)
+        {
+            if (game.Phase != GamePhase.Playing) return;
+            banner.text = text;
+            banner.RemoveFromClassList("hidden");
+            banner.RemoveFromClassList("day-banner--out");
+            bannerTimer = bannerSeconds;
         }
 
         private void SetStatus(string kind, string text)
@@ -177,11 +202,7 @@ namespace GridKeeper.UI
         private void OnDayStarted(int dayNumber, WeatherProfile profile)
         {
             RenderForecast(dayNumber - 1);
-            if (game.Phase != GamePhase.Playing) return;
-            banner.text = "Day " + dayNumber + " · " + profile.Label;
-            banner.RemoveFromClassList("hidden");
-            banner.RemoveFromClassList("day-banner--out");
-            bannerTimer = bannerSeconds;
+            if (dayNumber > 1 && game.Phase == GamePhase.Playing) pendingDayBanner = "Day " + dayNumber + " · " + profile.Label;
         }
 
         private void RenderClock()
@@ -189,7 +210,7 @@ namespace GridKeeper.UI
             int minute = Mathf.FloorToInt(game.Clock.ElapsedHours * 60f);
             if (minute == shownMinute) return;
             shownMinute = minute;
-            day.text = "DAY " + game.Clock.Day + " OF " + game.Clock.Days;
+            day.text = "DAY " + game.Clock.Day + " · " + game.StrikesLeft + (game.StrikesLeft == 1 ? " LIFE" : " LIVES");
             time.text = GameClock.Format(game.Clock.HourOfDay);
         }
 
@@ -218,6 +239,12 @@ namespace GridKeeper.UI
             {
                 bannerTimer -= Time.unscaledDeltaTime;
                 if (bannerTimer <= 0f) banner.AddToClassList("day-banner--out");
+            }
+            else if (pendingDayBanner != null)
+            {
+                string next = pendingDayBanner;
+                pendingDayBanner = null;
+                ShowBanner(next);
             }
         }
     }

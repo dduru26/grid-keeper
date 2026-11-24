@@ -185,7 +185,7 @@ namespace GridKeeper.Tutorial
                 case TutorialStep.ReadForecast:
                     return ForecastHint();
                 case TutorialStep.FreePlay:
-                    return "Hints are off now. Brightwater is yours, Keeper.";
+                    return "Hints are off now. The town grows every day. How long can you keep it lit?";
                 default:
                     return string.Empty;
             }
@@ -193,15 +193,8 @@ namespace GridKeeper.Tutorial
 
         private string ForecastHint()
         {
-            var forecast = game.Weather.Forecast;
-            for (int i = 1; i < forecast.Count; i++)
-            {
-                if (forecast[i].Heatwave)
-                {
-                    return "Check the forecast chip. A heatwave is coming on day " + (i + 1) + ": demand rises 30% and the wind drops. Store energy early.";
-                }
-            }
-            return "Check the forecast chip each morning. Cloud cuts solar, strong wind favours turbines on the hills.";
+            WeatherProfile tomorrow = game.Weather.ForDay(game.Clock.Day);
+            return "Check the Tomorrow chip. Tomorrow brings " + tomorrow.Label.ToLower() + ". Cloud cuts solar, wind favours the hills, and a heatwave raises demand by 30%.";
         }
     }
 }

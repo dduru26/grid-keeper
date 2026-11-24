@@ -5,32 +5,27 @@ namespace GridKeeper.Simulation
     public sealed class GameClock
     {
         public float StartHour { get; }
-        public int Days { get; }
         public float TickHours { get; }
         public float HoursPerSecond { get; }
         public float ElapsedHours { get; private set; }
 
-        public float TotalHours => Days * 24f;
         public float HourOfDay => Mathf.Repeat(StartHour + ElapsedHours, 24f);
-        public int Day => Mathf.Min(Days, 1 + Mathf.FloorToInt(ElapsedHours / 24f));
-        public float Progress01 => Mathf.Clamp01(ElapsedHours / TotalHours);
-        public bool IsFinished => ElapsedHours >= TotalHours - 0.0001f;
+        public int Day => 1 + Mathf.FloorToInt(ElapsedHours / 24f);
 
         private float pendingHours;
 
-        public GameClock(float startHour, int days, float shiftSeconds, float tickHours)
+        public GameClock(float startHour, float secondsPerDay, float tickHours)
         {
             StartHour = startHour;
-            Days = days;
             TickHours = tickHours;
-            HoursPerSecond = days * 24f / Mathf.Max(1f, shiftSeconds);
+            HoursPerSecond = 24f / Mathf.Max(1f, secondsPerDay);
         }
 
         public int Advance(float seconds)
         {
             pendingHours += seconds * HoursPerSecond;
             int ticks = 0;
-            while (pendingHours >= TickHours && !IsFinished)
+            while (pendingHours >= TickHours)
             {
                 pendingHours -= TickHours;
                 ElapsedHours += TickHours;
@@ -40,7 +35,7 @@ namespace GridKeeper.Simulation
         }
 
         public float Interpolation => Mathf.Clamp01(pendingHours / TickHours);
-        public float SmoothElapsedHours => Mathf.Min(TotalHours, ElapsedHours + pendingHours);
+        public float SmoothElapsedHours => ElapsedHours + pendingHours;
         public float SmoothHourOfDay => Mathf.Repeat(StartHour + SmoothElapsedHours, 24f);
 
         public void Reset()

@@ -1,6 +1,6 @@
 # Grid Keeper
 
-A tabletop AR management puzzle for iPhone. Place the small bay town of Brightwater on a real table, then keep its lights on for a three-day shift by building solar panels, wind turbines and batteries around the weather and the clock.
+A tabletop AR management puzzle for iPhone. Place the small bay town of Brightwater on a real table, then keep its lights on for as many days as you can by building solar panels, wind turbines and batteries around the weather and the clock.
 
 Built in Unity 6 with AR Foundation and ARKit as the vertical slice of the Grid Keeper Game Design Document.
 
@@ -8,11 +8,13 @@ Built in Unity 6 with AR Foundation and ARKit as the vertical slice of the Grid 
 
 - **Scan and place:** a dot field shows the detected table, and a dashed amber footprint shows where the town will land. Tap to anchor it.
 - **Build:** pick Solar ($150), Wind ($200) or Battery ($120). The first tap shows a ghost preview and the second tap builds with a haptic tick. Remove refunds half the price.
-- **Simulate:** a three-day shift plays out in two minutes. Solar follows the sun, wind follows the weather (+40% on hills, -20% next to another turbine), and batteries store 30 MWh at 8 MW.
-- **Weather:** a seeded forecast for each shift with clear, cloudy, windy and heatwave days. Heatwaves raise demand by 30%.
+- **Endless run:** each in-game day lasts 40 seconds and the days never stop. Demand grows 4% a day (up to double). Solar follows the sun, wind follows the weather (+40% on hills, -20% next to another turbine), and batteries store 30 MWh at 8 MW.
+- **Weather:** random weather every day (clear, cloudy, windy or heatwave), with today and tomorrow on the HUD. Heatwaves raise demand by 30%.
+- **Score and lives:** 10 points per MWh delivered, plus a bonus for every A, B or C day (300, 150, 50). A day under 55% of demand costs one of three lives. The best score is saved on the phone.
 - **Blackouts:** when supply falls short, buildings go dark in priority order. The hospital stays lit longest, then houses, shops and the factory. A red edge pulses around the screen.
-- **Results:** a grade from A to D based on the share of demand met, the council's note, and a full-shift chart of solar, wind, storage and demand.
-- **Tutorial shift:** Keeper's Notes guide the first shift and pause the clock at dusk until you build a battery.
+- **Results:** score and best score, days survived, a grade from A to D for the whole run, the council's note and a chart of the last days.
+- **HUD:** a status pill (town powered, surplus or short), a meter for how much demand you are meeting, the score, and day plus lives.
+- **Tutorial:** five story cards explain the goal in plain words, then Keeper's Notes guide the first days and pause the clock at dusk until you build a battery.
 - **Day and night:** the sun moves with the clock, windows glow at night, clouds cast shadows and the factory chimney smokes during working hours.
 - **Audio:** day and night ambience, a wind loop that follows wind speed, and cues for dawn, dusk, building, blackouts, power restored and results.
 
@@ -58,17 +60,17 @@ For a phone-shaped view, switch the Game view to **Simulator** and choose **iOS 
 ## How to play
 
 1. Move the phone slowly over a table until the dots appear, then tap to place Brightwater.
-2. Read the council's message and the three-day forecast, then press **Plan the grid**.
-3. Build a few sources and press **Start the shift**.
-4. Watch the HUD: the clock, today's and tomorrow's weather, live supply, demand and storage, and the chart.
+2. Read the story cards and the council's forecast for today and tomorrow, then press **Plan the grid**.
+3. Build a few sources and press **Start the shift**. The run starts on a 12 by 12 town with $1,300.
+4. Watch the HUD: day and lives, the status pill and meter, the score, today's and tomorrow's weather, and the chart.
 5. Spend what you earn ($3 per MWh delivered) to prepare for evenings and bad weather.
-6. After three days you get a grade: A at 90% of demand met, B at 75%, C at 55%, D below that.
+6. Each day is graded: A at 90% of demand met, B at 75%, C at 55%, D below that. A D day costs a life. Lose three and the run ends, or end it yourself from the pause menu, and try to beat your best score.
 
 ## Project structure
 
 ```
 Assets/GridKeeper
-├── Audio            Procedurally generated sound effects and loops
+├── Audio            Generated loops and cues plus CC0 Kenney sounds (see CREDITS.md)
 ├── Data             ScriptableObject assets for sources, buildings, weather, balance and layout
 ├── Editor           Content, board, scene, performance and build tools
 ├── Fonts            Bricolage Grotesque, Instrument Sans, JetBrains Mono (OFL)
@@ -88,7 +90,7 @@ Assets/GridKeeper
 │   └── World         City, Tile, Building
 └── UI               UXML, USS, theme and panel settings
 Assets/Plugins/iOS   Native haptics (UIKit feedback generators)
-Tools                make_audio.py, the generator for every sound in the game
+Tools                make_audio.py, the generator for the sounds made in code
 ```
 
 ## Architecture
@@ -98,7 +100,7 @@ Tools                make_audio.py, the generator for every sound in the game
 | State | `GameState` with `PlacingState`, `BriefingState`, `PlayingState`, `PausedState` and `ResultsState`, driven by `GameManager` |
 | Strategy and polymorphism | `PowerSource` is abstract. `SolarPanel` and `WindTurbine` each supply their own output rule. `EnergyGrid` works with any `Placeable` |
 | Factory | `SourceFactory` creates and removes sources, so the toolbar never instantiates prefabs itself |
-| Observer | C# events (`Ticked`, `PhaseChanged`, `BlackoutChanged`, `ShiftEnded`, `Built`, `CityPlaced`) drive the UI, audio and tutorial without them polling the game |
+| Observer | C# events (`Ticked`, `PhaseChanged`, `BlackoutChanged`, `DayCompleted`, `ShiftEnded`, `Built`, `CityPlaced`) drive the UI, audio and tutorial without them polling the game |
 | Data-driven design (open/closed) | Every tuning value lives in ScriptableObjects (`BalanceConfig`, `PlaceableDefinition`, `BuildingDefinition`, `WeatherProfile`, `CityLayout`), so balance changes need no code changes |
 | Single responsibility | `EnergyGrid` only balances a tick, `GameClock` only keeps time, the views only render |
 | Encapsulation | `Battery` owns its stored energy and rate limits, and `Wallet` owns the money |
@@ -119,12 +121,12 @@ Profiled on iPhone XR against a **60 FPS** target. The full write-up is in the P
 
 ## Scope
 
-This build contains the Brightwater town only. The Harbor and Ridge towns, wind streak effects, multiplayer, cloud saves and Android are planned for a later version.
+This build contains the Brightwater town only. An online leaderboard for the best score is the next step. The Harbor and Ridge towns, wind streak effects, multiplayer, cloud saves and Android are planned for a later version.
 
 ## Credits
 
 - Fonts: Bricolage Grotesque, Instrument Sans and JetBrains Mono under the SIL Open Font License (licences in `Assets/GridKeeper/Fonts`)
-- Audio: generated from code with `Tools/make_audio.py`
+- Audio: town ambience, build click, select tick and power-restored sounds from Kenney's Starter Kit City Builder and Starter Kit 3D Platformer (CC0, kenney.nl). All other sounds are generated from code with `Tools/make_audio.py`
 - 3D models: low-poly meshes generated by the Editor scripts in `Assets/GridKeeper/Editor`
 
 Duru Donald Onyebuchi

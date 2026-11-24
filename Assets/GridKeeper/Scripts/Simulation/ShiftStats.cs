@@ -13,7 +13,13 @@ namespace GridKeeper.Simulation
 
     public sealed class ShiftStats
     {
+        public const int MaxSamples = 96 * 7;
+
         public readonly List<TickResult> Samples = new List<TickResult>();
+        public int Score { get; private set; }
+        public int DaysCompleted { get; private set; }
+        public int Strikes { get; private set; }
+        public int GradeADays { get; private set; }
 
         public float DemandMWh { get; private set; }
         public float DeliveredMWh { get; private set; }
@@ -29,6 +35,7 @@ namespace GridKeeper.Simulation
         public void Record(TickResult result, float hours, float earned)
         {
             Samples.Add(result);
+            if (Samples.Count > MaxSamples) Samples.RemoveRange(0, Samples.Count - MaxSamples);
             DemandMWh += result.DemandMW * hours;
             DeliveredMWh += result.DeliveredMW * hours;
             WastedMWh += result.WastedMW * hours;
@@ -39,8 +46,21 @@ namespace GridKeeper.Simulation
             PeakDemandMW = Mathf.Max(PeakDemandMW, result.DemandMW);
         }
 
+        public void AddPoints(int points)
+        {
+            Score += points;
+        }
+
+        public void CompleteDay(Grade grade, bool strike)
+        {
+            DaysCompleted++;
+            if (grade == Grade.A) GradeADays++;
+            if (strike) Strikes++;
+        }
+
         public void Reset()
         {
+            Score = DaysCompleted = Strikes = GradeADays = 0;
             Samples.Clear();
             DemandMWh = DeliveredMWh = WastedMWh = SolarMWh = WindMWh = BlackoutHours = Earned = PeakDemandMW = 0f;
         }
@@ -60,10 +80,10 @@ namespace GridKeeper.Simulation
         {
             switch (grade)
             {
-                case Grade.A: return "Brightwater slept soundly. Please stay on as our Keeper.";
-                case Grade.B: return "A few dark evenings, but the town is proud of you.";
-                case Grade.C: return "We made it through, with some long nights. Try storing more sun.";
-                default: return "The town spent too long in the dark. Let's try again.";
+                case Grade.A: return "Brightwater slept soundly night after night. Legendary work, Keeper.";
+                case Grade.B: return "A few dark evenings, but the town is proud of how long you lasted.";
+                case Grade.C: return "Plenty of long nights. Store more sun and build wind on the hills.";
+                default: return "The town spent too long in the dark. Try again and beat your score.";
             }
         }
     }
