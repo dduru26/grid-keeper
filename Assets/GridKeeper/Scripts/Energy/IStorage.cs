@@ -4,6 +4,7 @@ namespace GridKeeper.Energy
     {
         float StoredMWh { get; }
         float CapacityMWh { get; }
+        void BeginTick();
         float Charge(float surplusMW, float hours);
         float Discharge(float shortfallMW, float hours);
     }

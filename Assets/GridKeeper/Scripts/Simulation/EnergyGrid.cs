@@ -16,6 +16,8 @@ namespace GridKeeper.Simulation
                 else result.SolarMW += output;
             }
 
+            foreach (IStorage store in storage) store.BeginTick();
+
             float generation = result.GenerationMW;
             if (generation >= demandMW)
             {
