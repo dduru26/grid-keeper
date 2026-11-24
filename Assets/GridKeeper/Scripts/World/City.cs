@@ -21,9 +21,13 @@ namespace GridKeeper.World
         public CityLayout Layout => layout;
         public IReadOnlyList<Building> Buildings => buildings;
         public IReadOnlyList<Placeable> Placeables => placeables;
+        public IReadOnlyList<IGenerator> Generators => generators;
+        public IReadOnlyList<IStorage> Storage => storage;
 
         private readonly List<Building> buildings = new List<Building>();
         private readonly List<Placeable> placeables = new List<Placeable>();
+        private readonly List<IGenerator> generators = new List<IGenerator>();
+        private readonly List<IStorage> storage = new List<IStorage>();
         private readonly List<Building> sorted = new List<Building>();
         private readonly Dictionary<Vector2Int, Tile> tiles = new Dictionary<Vector2Int, Tile>();
 
@@ -109,12 +113,16 @@ namespace GridKeeper.World
         {
             if (placeables.Contains(placeable)) return;
             placeables.Add(placeable);
+            if (placeable is IGenerator generator) generators.Add(generator);
+            if (placeable is IStorage store) storage.Add(store);
             PlaceableAdded?.Invoke(placeable);
         }
 
         public void Unregister(Placeable placeable)
         {
             if (!placeables.Remove(placeable)) return;
+            if (placeable is IGenerator generator) generators.Remove(generator);
+            if (placeable is IStorage store) storage.Remove(store);
             PlaceableRemoved?.Invoke(placeable);
         }
 

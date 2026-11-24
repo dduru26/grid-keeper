@@ -7,6 +7,8 @@ namespace GridKeeper.Energy
         public const float Sunrise = 6f;
         public const float Sunset = 18f;
 
+        public override GeneratorKind Kind => GeneratorKind.Solar;
+
         public static float SunFactor(float hour)
         {
             hour = Mathf.Repeat(hour, 24f);

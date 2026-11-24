@@ -240,7 +240,7 @@ namespace GridKeeper.Core
             float multiplier = DemandMultiplier(dayIndex, sample.heatwave);
             float demand = city.DemandAt(hourOfDay, multiplier);
 
-            TickResult result = grid.Balance(demand, city.Placeables, hourOfDay, sample, hours);
+            TickResult result = grid.Balance(demand, city.Generators, city.Storage, hourOfDay, sample, hours);
             result.ElapsedHours = elapsedHours;
 
             float earned = result.DeliveredMW * hours * balance.revenuePerMWh;

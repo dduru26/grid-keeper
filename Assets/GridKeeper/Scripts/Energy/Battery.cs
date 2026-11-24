@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace GridKeeper.Energy
 {
-    public class Battery : Placeable
+    public class Battery : Placeable, IStorage
     {
         [SerializeField, Tooltip("Child scaled on Y to show the charge level.")]
         private Transform chargeBar;

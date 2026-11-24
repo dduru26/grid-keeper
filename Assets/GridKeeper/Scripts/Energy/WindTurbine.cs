@@ -11,6 +11,8 @@ namespace GridKeeper.Energy
 
         private float windStrength = 0.4f;
 
+        public override GeneratorKind Kind => GeneratorKind.Wind;
+
         public bool HasWakePenalty
         {
             get
