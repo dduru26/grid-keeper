@@ -14,6 +14,7 @@ namespace GridKeeper.Simulation
         public float WastedMW;
         public float StoredMWh;
         public float CapacityMWh;
+        public float EarnedDollars;
 
         public float GenerationMW => SolarMW + WindMW;
         public bool IsBlackout => UnmetMW > UnityEngine.Mathf.Max(0.05f, DemandMW * 0.02f);
