@@ -10,6 +10,7 @@ namespace GridKeeper.EditorTools
         private const float GrassHeight = 0.008f;
         private const float HillHeight = 0.022f;
         private const float WaterHeight = 0.004f;
+        public const float BoardScale = 0.8f;
 
         public static City Build(ContentSet content)
         {
@@ -40,6 +41,7 @@ namespace GridKeeper.EditorTools
                 }
             }
 
+            root.transform.localScale = Vector3.one * BoardScale;
             return city;
         }
 

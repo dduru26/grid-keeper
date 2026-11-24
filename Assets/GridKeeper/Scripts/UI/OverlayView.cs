@@ -1,6 +1,7 @@
 using GridKeeper.Core;
 using GridKeeper.Data;
 using GridKeeper.Simulation;
+using GridKeeper.Tutorial;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -26,6 +27,81 @@ namespace GridKeeper.UI
         private ShiftChart chart;
         private Button startButton;
         private bool briefingDismissed;
+        private Label briefingEyebrow;
+        private Label briefingTitle;
+        private Label briefingBody;
+        private VisualElement briefingVisual;
+        private VisualElement briefingDots;
+        private Button planButton;
+        private Button skipButton;
+        private int card;
+        private bool storyMode;
+        private bool briefingShown;
+
+        private static readonly Color Solar = new Color(0.949f, 0.647f, 0.086f);
+        private static readonly Color Wind = new Color(0.063f, 0.627f, 0.639f);
+        private static readonly Color Stored = new Color(0.545f, 0.42f, 0.886f);
+        private static readonly Color Demand = Color.white;
+        private static readonly Color Dark = new Color(0.84f, 0.27f, 0.23f);
+
+        private struct StoryCard
+        {
+            public string Eyebrow;
+            public string Title;
+            public string Body;
+            public (Color colour, string text, bool line)[] Rows;
+        }
+
+        private static readonly StoryCard[] Story =
+        {
+            new StoryCard
+            {
+                Eyebrow = "THE STORY",
+                Title = "Brightwater needs you.",
+                Body = "The town's old coal generator has shut down for good. From today, every light in Brightwater runs on clean energy that you build."
+            },
+            new StoryCard
+            {
+                Eyebrow = "YOUR GOAL",
+                Title = "Keep the lights on for 3 days.",
+                Body = "Each day the town needs power. The more of that need you meet, the higher your grade at the end.",
+                Rows = new[]
+                {
+                    (new Color(0.36f, 0.75f, 0.45f), "Meet 90% or more for an A", false),
+                    (Dark, "Too little power means blackouts", false)
+                }
+            },
+            new StoryCard
+            {
+                Eyebrow = "YOUR TOOLS",
+                Title = "Three ways to power the town.",
+                Body = "Tap a tool, then tap an empty grass tile to build it.",
+                Rows = new[]
+                {
+                    (Solar, "Solar makes power while the sun is up", false),
+                    (Wind, "Wind works day and night. Best on green hills", false),
+                    (Stored, "Batteries save spare power for the night", false)
+                }
+            },
+            new StoryCard
+            {
+                Eyebrow = "READ THE CHART",
+                Title = "Colours over the white line.",
+                Body = "The chart shows what the town needs and what you give it. Keep the colours at or above the line.",
+                Rows = new[]
+                {
+                    (Demand, "White line: what the town needs", true),
+                    (Solar, "Colours: the power you supply", false),
+                    (Dark, "Red edge on screen: a blackout", false)
+                }
+            },
+            new StoryCard
+            {
+                Eyebrow = "WATCH THE SKY",
+                Title = "The weather changes every day.",
+                Body = "Clouds cut solar. Wind comes and goes. A heatwave makes the town hungrier. Check the forecast each morning and plan ahead."
+            }
+        };
 
         private void Start()
         {
@@ -50,7 +126,15 @@ namespace GridKeeper.UI
 
             startButton = root.Q<Button>("start-button");
             startButton.clicked += game.StartShift;
-            root.Q<Button>("plan-button").clicked += DismissBriefing;
+            briefingEyebrow = root.Q<Label>("briefing-eyebrow");
+            briefingTitle = root.Q<Label>("briefing-title");
+            briefingBody = root.Q<Label>("briefing-body");
+            briefingVisual = root.Q<VisualElement>("briefing-visual");
+            briefingDots = root.Q<VisualElement>("briefing-dots");
+            planButton = root.Q<Button>("plan-button");
+            skipButton = root.Q<Button>("briefing-skip");
+            planButton.clicked += NextCard;
+            skipButton.clicked += SkipStory;
             root.Q<Button>("resume-button").clicked += game.TogglePause;
             root.Q<Button>("restart-button").clicked += game.Restart;
             root.Q<Button>("again-button").clicked += game.Restart;
@@ -65,6 +149,75 @@ namespace GridKeeper.UI
             if (game == null) return;
             game.PhaseChanged -= Render;
             game.ShiftEnded -= ShowResults;
+        }
+
+        private void NextCard()
+        {
+            if (storyMode && card < Story.Length)
+            {
+                card++;
+                RenderCard();
+                return;
+            }
+            DismissBriefing();
+        }
+
+        private void SkipStory()
+        {
+            card = Story.Length;
+            RenderCard();
+        }
+
+        private void RenderCard()
+        {
+            bool final = !storyMode || card >= Story.Length;
+            briefingVisual.Clear();
+            briefingDots.Clear();
+            skipButton.EnableInClassList("hidden", final);
+            briefingDots.EnableInClassList("hidden", !storyMode);
+            briefingForecast.EnableInClassList("hidden", !final);
+
+            if (storyMode)
+            {
+                for (int i = 0; i <= Story.Length; i++)
+                {
+                    var dot = new VisualElement();
+                    dot.AddToClassList("story__dot");
+                    dot.EnableInClassList("story__dot--on", i == card);
+                    briefingDots.Add(dot);
+                }
+            }
+
+            if (final)
+            {
+                briefingEyebrow.text = "A MESSAGE FROM THE COUNCIL";
+                briefingTitle.text = "Welcome, Keeper.";
+                briefingBody.text = "Houses need light at night, the factory runs in working hours and the hospital can never go dark. Here is the forecast for your 3 days.";
+                planButton.text = "Plan the grid";
+                RenderBriefingForecast();
+                return;
+            }
+
+            StoryCard current = Story[card];
+            briefingEyebrow.text = current.Eyebrow;
+            briefingTitle.text = current.Title;
+            briefingBody.text = current.Body;
+            planButton.text = "Next";
+            if (current.Rows == null) return;
+            foreach (var row in current.Rows)
+            {
+                var item = new VisualElement();
+                item.AddToClassList("story__row");
+                var swatch = new VisualElement();
+                swatch.AddToClassList("story__swatch");
+                swatch.EnableInClassList("story__swatch--line", row.line);
+                swatch.style.backgroundColor = row.colour;
+                var label = new Label(row.text);
+                label.AddToClassList("story__row-text");
+                item.Add(swatch);
+                item.Add(label);
+                briefingVisual.Add(item);
+            }
         }
 
         private void DismissBriefing()
@@ -83,7 +236,14 @@ namespace GridKeeper.UI
             results.EnableInClassList("hidden", phase != GamePhase.Results);
             buildLayer.EnableInClassList("hidden", phase == GamePhase.Placing || phase == GamePhase.Results || (phase == GamePhase.Briefing && !briefingDismissed));
 
-            if (phase == GamePhase.Briefing && !briefingDismissed) RenderBriefingForecast();
+            if (phase == GamePhase.Briefing && !briefingDismissed && !briefingShown)
+            {
+                briefingShown = true;
+                storyMode = !TutorialDirector.Completed;
+                card = 0;
+                RenderCard();
+            }
+            if (phase != GamePhase.Briefing) briefingShown = false;
         }
 
         private void RenderBriefingForecast()

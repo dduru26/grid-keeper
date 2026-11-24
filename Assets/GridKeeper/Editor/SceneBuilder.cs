@@ -168,7 +168,7 @@ namespace GridKeeper.EditorTools
             quad.transform.SetParent(root.transform, false);
             quad.transform.localPosition = new Vector3(0f, 0.002f, 0f);
             quad.transform.localRotation = Quaternion.Euler(90f, 0f, 0f);
-            quad.transform.localScale = new Vector3(0.44f, 0.44f, 1f);
+            quad.transform.localScale = new Vector3(0.52f, 0.52f, 1f);
             var renderer = quad.GetComponent<MeshRenderer>();
             renderer.sharedMaterial = material;
             renderer.shadowCastingMode = ShadowCastingMode.Off;

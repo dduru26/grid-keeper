@@ -15,11 +15,15 @@ MonoBehaviour:
   townName: Brightwater
   tileSize: 0.05
   rows:
-  - hhh..hhh
-  - h.T..T.h
-  - .H..H...
-  - ...S..F.
-  - .H..P.H.
-  - ..S.....
-  - .H..T.H.
-  - wwwwwwww
+  - hhhh..hhhhhh
+  - h.T..T..T..h
+  - .H..H...H..T
+  - ...S...F....
+  - .H..P..S..H.
+  - ............
+  - .H..S...H..T
+  - ..T.....H...
+  - .H..T..S..H.
+  - h..........h
+  - ....T..T....
+  - wwwwwwwwwwww

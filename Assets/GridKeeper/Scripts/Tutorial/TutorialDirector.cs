@@ -90,7 +90,7 @@ namespace GridKeeper.Tutorial
             {
                 Go(Completed ? TutorialStep.Off : TutorialStep.BuildSolar);
             }
-            else if (phase == GamePhase.Playing && Step == TutorialStep.StartShift)
+            else if (phase == GamePhase.Playing && (Step == TutorialStep.StartShift || Step == TutorialStep.BuildSolar))
             {
                 Go(TutorialStep.WatchMorning);
             }

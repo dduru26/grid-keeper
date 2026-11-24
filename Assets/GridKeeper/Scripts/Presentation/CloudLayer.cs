@@ -7,9 +7,9 @@ namespace GridKeeper.Presentation
     {
         [SerializeField] private GameManager game;
         [SerializeField] private GameObject cloudPrefab;
-        [SerializeField, Min(1)] private int count = 5;
+        [SerializeField, Min(1)] private int count = 7;
         [SerializeField] private float height = 0.13f;
-        [SerializeField] private float halfWidth = 0.26f;
+        [SerializeField] private float halfWidth = 0.36f;
         [SerializeField] private float driftSpeed = 0.02f;
         [SerializeField] private float cloudScale = 1.8f;
 

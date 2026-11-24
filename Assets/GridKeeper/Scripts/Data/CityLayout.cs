@@ -19,20 +19,33 @@ namespace GridKeeper.Data
         [SerializeField, Tooltip("First row is the back of the board, last row is the front.")]
         private string[] rows =
         {
-            "hhh..hhh",
-            "h.T..T.h",
-            ".H..H...",
-            "...S..F.",
-            ".H..P.H.",
-            "..S.....",
-            ".H..T.H.",
-            "wwwwwwww"
+            "hhhh..hhhhhh",
+            "h.T..T..T..h",
+            ".H..H...H..T",
+            "...S...F....",
+            ".H..P..S..H.",
+            "............",
+            ".H..S...H..T",
+            "..T.....H...",
+            ".H..T..S..H.",
+            "h..........h",
+            "....T..T....",
+            "wwwwwwwwwwww"
         };
 
         public string TownName => townName;
         public float TileSize => tileSize;
         public int Depth => rows.Length;
         public int Width => rows.Length == 0 ? 0 : rows[0].Length;
+
+        public void Configure(string name, float size, string[] layoutRows)
+        {
+            townName = name;
+            tileSize = size;
+            rows = layoutRows;
+        }
+
+        public string[] Rows => rows;
 
         public char At(int x, int z)
         {

@@ -11,6 +11,8 @@ namespace GridKeeper.EditorTools
         [MenuItem("Grid Keeper/Build/iOS Xcode Project")]
         public static void BuildIOS()
         {
+            PlayerSettings.iOS.appleDeveloperTeamID = "8CGM596A96";
+            PlayerSettings.iOS.appleEnableAutomaticSigning = true;
             var options = new BuildPlayerOptions
             {
                 scenes = new[] { "Assets/GridKeeper/Scenes/Main.unity" },
@@ -27,6 +29,8 @@ namespace GridKeeper.EditorTools
         [MenuItem("Grid Keeper/Build/iOS Development Build")]
         public static void BuildIOSDevelopment()
         {
+            PlayerSettings.iOS.appleDeveloperTeamID = "8CGM596A96";
+            PlayerSettings.iOS.appleEnableAutomaticSigning = true;
             var options = new BuildPlayerOptions
             {
                 scenes = new[] { "Assets/GridKeeper/Scenes/Main.unity" },

@@ -7,7 +7,7 @@
             <ui:VisualElement class="hud__row" picking-mode="Ignore">
                 <ui:VisualElement name="budget" class="pill budget" picking-mode="Ignore">
                     <ui:Label text="BUDGET" class="pill__caption" picking-mode="Ignore" />
-                    <ui:Label name="budget-value" text="$900" class="pill__value" picking-mode="Ignore" />
+                    <ui:Label name="budget-value" text="$1300" class="pill__value" picking-mode="Ignore" />
                 </ui:VisualElement>
                 <ui:VisualElement name="clock" class="pill clock" picking-mode="Ignore">
                     <ui:Label name="clock-day" text="DAY 1 OF 3" class="pill__caption" picking-mode="Ignore" />
@@ -31,6 +31,16 @@
                 </ui:VisualElement>
             </ui:VisualElement>
             <ui:VisualElement name="stats-card" class="card stats" picking-mode="Ignore">
+                <ui:VisualElement class="status" picking-mode="Ignore">
+                    <ui:VisualElement name="status-pill" class="status__pill" picking-mode="Ignore">
+                        <ui:VisualElement class="status__dot" picking-mode="Ignore" />
+                        <ui:Label name="status-text" text="READY" class="status__text" picking-mode="Ignore" />
+                    </ui:VisualElement>
+                    <ui:Label name="status-grade" text="GRADE --" class="status__grade mono" picking-mode="Ignore" />
+                </ui:VisualElement>
+                <ui:VisualElement class="meter" picking-mode="Ignore">
+                    <ui:VisualElement name="meter-fill" class="meter__fill" picking-mode="Ignore" />
+                </ui:VisualElement>
                 <ui:VisualElement class="stats__legend" picking-mode="Ignore">
                     <ui:Label name="stat-supply" text="SUPPLY 0.0 MW" class="legend legend--supply mono" picking-mode="Ignore" />
                     <ui:Label name="stat-demand" text="DEMAND 0.0 MW" class="legend legend--demand mono" picking-mode="Ignore" />
@@ -81,10 +91,15 @@
         </ui:VisualElement>
         <ui:VisualElement name="briefing" class="overlay hidden">
             <ui:VisualElement class="sheet">
-                <ui:Label text="A MESSAGE FROM THE COUNCIL" class="sheet__eyebrow" />
-                <ui:Label text="Welcome, Keeper." class="sheet__title" />
-                <ui:Label text="The old generator has been removed and Brightwater relies on you now. Houses need light at night, the factory runs during working hours and the hospital can never go dark. You have three days and a small budget. Watch the sky." class="sheet__body" />
+                <ui:VisualElement class="story__top">
+                    <ui:Label name="briefing-eyebrow" text="A MESSAGE FROM THE COUNCIL" class="sheet__eyebrow" />
+                    <ui:Button name="briefing-skip" text="Skip" class="story__skip" />
+                </ui:VisualElement>
+                <ui:Label name="briefing-title" text="Welcome, Keeper." class="sheet__title" />
+                <ui:Label name="briefing-body" text="" class="sheet__body" />
+                <ui:VisualElement name="briefing-visual" class="story__visual" />
                 <ui:VisualElement name="briefing-forecast" class="briefing-forecast" />
+                <ui:VisualElement name="briefing-dots" class="story__dots" picking-mode="Ignore" />
                 <ui:Button name="plan-button" text="Plan the grid" class="primary-button" />
             </ui:VisualElement>
         </ui:VisualElement>

@@ -6,7 +6,7 @@ namespace GridKeeper.Data
     public class BalanceConfig : ScriptableObject
     {
         [Header("Economy")]
-        [Min(0)] public int startingBudget = 900;
+        [Min(0)] public int startingBudget = 1300;
         [Range(0f, 1f)] public float refundFraction = 0.5f;
         [Min(0f)] public float revenuePerMWh = 3f;
 

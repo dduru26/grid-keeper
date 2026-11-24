@@ -68,6 +68,25 @@ namespace GridKeeper.EditorTools
                 GhostInvalid = Ghost("GhostInvalid", new Color(0.84f, 0.27f, 0.23f, 0.6f))
             };
 
+            set.Layout.Configure("Brightwater", 0.05f, new[]
+            {
+                "hhhh..hhhhhh",
+                "h.T..T..T..h",
+                ".H..H...H..T",
+                "...S...F....",
+                ".H..P..S..H.",
+                "............",
+                ".H..S...H..T",
+                "..T.....H...",
+                ".H..T..S..H.",
+                "h..........h",
+                "....T..T....",
+                "wwwwwwwwwwww"
+            });
+            EditorUtility.SetDirty(set.Layout);
+            set.Balance.startingBudget = 1300;
+            EditorUtility.SetDirty(set.Balance);
+
             set.Solar = Definition("Solar", SourceKind.Solar, "Solar panel", 150, BuildSolar(), SceneBuilder.SolarAmber, 8f, 0f, 0f);
             set.Wind = Definition("Wind", SourceKind.Wind, "Wind turbine", 200, BuildTurbine(), SceneBuilder.WindTeal, 6f, 0f, 0f);
             set.Battery = Definition("Battery", SourceKind.Battery, "Battery", 120, BuildBattery(), SceneBuilder.BatteryViolet, 0f, 30f, 8f);

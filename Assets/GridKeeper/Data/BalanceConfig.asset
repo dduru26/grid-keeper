@@ -12,9 +12,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe3c291625dec4eb993ab721dd7a743e, type: 3}
   m_Name: BalanceConfig
   m_EditorClassIdentifier: Assembly-CSharp::GridKeeper.Data.BalanceConfig
-  startingBudget: 900
+  startingBudget: 1300
   refundFraction: 0.5
   revenuePerMWh: 3
+  shiftSeconds: 120
+  shiftDays: 3
+  startHour: 6
+  tickHours: 0.25
+  gradeA: 0.9
+  gradeB: 0.75
+  gradeC: 0.55
   hillWindBonus: 0.4
   wakePenalty: 0.2
   heavyCloudSolarLoss: 0.75

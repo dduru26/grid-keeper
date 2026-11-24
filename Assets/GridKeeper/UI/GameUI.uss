@@ -584,3 +584,155 @@
 .fps--low {
     color: rgb(255, 140, 120);
 }
+
+.story__top {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.story__skip {
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    color: rgba(255, 255, 255, 0.55);
+    font-size: 24px;
+    margin: -6px -10px 0 0;
+    padding: 6px 10px;
+}
+
+.story__visual {
+    margin-bottom: 14px;
+}
+
+.story__row {
+    flex-direction: row;
+    align-items: center;
+    background-color: rgba(255, 255, 255, 0.06);
+    border-radius: 20px;
+    padding: 14px 18px;
+    margin-bottom: 10px;
+}
+
+.story__swatch {
+    width: 30px;
+    height: 30px;
+    border-radius: 15px;
+    margin-right: 18px;
+    flex-shrink: 0;
+}
+
+.story__swatch--line {
+    height: 6px;
+    border-radius: 3px;
+}
+
+.story__row-text {
+    color: rgb(255, 255, 255);
+    font-size: 25px;
+    white-space: normal;
+    flex-shrink: 1;
+    margin: 0;
+    padding: 0;
+}
+
+.story__row-text--muted {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.story__dots {
+    flex-direction: row;
+    justify-content: center;
+    margin: 4px 0 10px 0;
+}
+
+.story__dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 6px;
+    margin: 0 6px;
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.story__dot--on {
+    width: 34px;
+    background-color: rgb(242, 165, 22);
+}
+
+.status {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.status__pill {
+    flex-direction: row;
+    align-items: center;
+    border-radius: 18px;
+    padding: 6px 14px;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.status__dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 7px;
+    margin-right: 10px;
+    background-color: rgba(255, 255, 255, 0.6);
+}
+
+.status__text {
+    color: rgb(255, 255, 255);
+    font-size: 22px;
+    -unity-font-style: bold;
+    letter-spacing: 1px;
+    margin: 0;
+    padding: 0;
+}
+
+.status--ok .status__dot {
+    background-color: rgb(92, 191, 115);
+}
+
+.status--ok {
+    background-color: rgba(92, 191, 115, 0.2);
+}
+
+.status--surplus .status__dot {
+    background-color: rgb(242, 165, 22);
+}
+
+.status--surplus {
+    background-color: rgba(242, 165, 22, 0.2);
+}
+
+.status--short .status__dot {
+    background-color: rgb(214, 69, 59);
+}
+
+.status--short {
+    background-color: rgba(214, 69, 59, 0.35);
+}
+
+.status__grade {
+    color: rgb(255, 255, 255);
+    font-size: 24px;
+    -unity-font-style: bold;
+    margin: 0;
+    padding: 0;
+}
+
+.meter {
+    height: 12px;
+    border-radius: 6px;
+    background-color: rgba(255, 255, 255, 0.12);
+    margin-bottom: 10px;
+    overflow: hidden;
+}
+
+.meter__fill {
+    height: 100%;
+    width: 0%;
+    border-radius: 6px;
+    background-color: rgb(92, 191, 115);
+}

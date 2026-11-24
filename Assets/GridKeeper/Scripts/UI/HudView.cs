@@ -29,6 +29,13 @@ namespace GridKeeper.UI
         private Label banner;
         private VisualElement edge;
         private ShiftChart chart;
+        private VisualElement statusPill;
+        private Label statusText;
+        private Label statusGrade;
+        private VisualElement meterFill;
+        private string shownStatus;
+        private int shownMeter = -1;
+        private int shownShare = -1;
         private float bannerTimer;
         private int shownSupply = -1;
         private int shownDemand = -1;
@@ -52,6 +59,10 @@ namespace GridKeeper.UI
             stored = root.Q<Label>("stat-battery");
             banner = root.Q<Label>("day-banner");
             edge = root.Q<VisualElement>("blackout-edge");
+            statusPill = root.Q<VisualElement>("status-pill");
+            statusText = root.Q<Label>("status-text");
+            statusGrade = root.Q<Label>("status-grade");
+            meterFill = root.Q<VisualElement>("meter-fill");
 
             chart = new ShiftChart();
             chart.style.flexGrow = 1;
@@ -80,6 +91,10 @@ namespace GridKeeper.UI
             {
                 shownMinute = shownSupply = shownDemand = -1;
                 shownStored = -2;
+                shownMeter = shownShare = -1;
+                SetStatus("ready", "PLAN YOUR GRID");
+                statusGrade.text = "GRADE --";
+                meterFill.style.width = Length.Percent(0f);
                 RenderClock();
                 RenderForecast(0);
                 chart.SetData(game.Stats.Samples, liveWindowHours, liveWindowHours, true);
@@ -111,7 +126,52 @@ namespace GridKeeper.UI
                 stored.text = storedPercent < 0 ? "NO STORAGE" : "STORED " + storedPercent + "%";
             }
 
+            RenderStatus(tick);
             chart.SetData(game.Stats.Samples, liveWindowHours, liveWindowHours, true);
+        }
+
+        private void RenderStatus(TickResult tick)
+        {
+            if (tick.IsBlackout)
+            {
+                SetStatus("short", "SHORT " + tick.UnmetMW.ToString("0.0") + " MW");
+            }
+            else if (tick.ChargedMW > 0.05f || tick.WastedMW > 0.05f)
+            {
+                SetStatus("surplus", "SURPLUS +" + (tick.ChargedMW + tick.WastedMW).ToString("0.0") + " MW");
+            }
+            else
+            {
+                SetStatus("ok", "TOWN POWERED");
+            }
+
+            int meter = tick.DemandMW <= 0f ? 100 : Mathf.RoundToInt(Mathf.Clamp01(tick.DeliveredMW / tick.DemandMW) * 100f);
+            if (meter != shownMeter)
+            {
+                shownMeter = meter;
+                meterFill.style.width = Length.Percent(meter);
+                meterFill.style.backgroundColor = meter >= 98 ? new Color(0.36f, 0.75f, 0.45f) : meter >= 75 ? new Color(0.949f, 0.647f, 0.086f) : new Color(0.84f, 0.27f, 0.23f);
+            }
+
+            int share = Mathf.RoundToInt(game.Stats.ShareMet * 100f);
+            if (share != shownShare)
+            {
+                shownShare = share;
+                BalanceConfig b = game.Balance;
+                Grade grade = GradeTable.Evaluate(game.Stats.ShareMet, b.gradeA, b.gradeB, b.gradeC);
+                statusGrade.text = "GRADE " + grade + " · " + share + "%";
+            }
+        }
+
+        private void SetStatus(string kind, string text)
+        {
+            string key = kind + text;
+            if (key == shownStatus) return;
+            shownStatus = key;
+            statusPill.EnableInClassList("status--ok", kind == "ok");
+            statusPill.EnableInClassList("status--surplus", kind == "surplus");
+            statusPill.EnableInClassList("status--short", kind == "short");
+            statusText.text = text;
         }
 
         private void OnDayStarted(int dayNumber, WeatherProfile profile)
