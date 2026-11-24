@@ -105,10 +105,11 @@ Tools                make_audio.py, the generator for every sound in the game
 
 ## Performance
 
-Profiled on iPhone XR against a **60 FPS** target. The full write-up with Profiler screenshots is in the Performance Considerations section of the GDD.
+Profiled on iPhone XR against a **60 FPS** target. The full write-up is in the Performance Considerations section of the GDD, and the Profiler captures are in `Docs/performance`.
 
 - IL2CPP (Master configuration) for ARM64, managed and engine code stripping, incremental GC
-- URP mobile asset: SRP Batcher on, HDR off, 2x MSAA, one shadow cascade, 1.5 m shadow distance for a tabletop scene, no additional lights, no depth or opaque textures
+- URP mobile asset: SRP Batcher on, HDR off, MSAA off, render scale 0.85, one shadow cascade with a 512 shadow map, 1.5 m shadow distance for a tabletop scene, no additional lights, no depth or opaque textures
+- HUD text only rebuilds when a displayed value changes, which removes the per-tick garbage spikes
 - Static batching: the board and buildings are combined with `StaticBatchingUtility.Combine` once the town is anchored, so the anchor can still move
 - GPU instancing enabled on all shared materials, and all models share a small palette of materials
 - Mipmaps and ASTC compression on textures, capped at 256 px

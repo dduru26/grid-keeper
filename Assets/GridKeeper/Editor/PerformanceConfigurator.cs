@@ -24,14 +24,14 @@ namespace GridKeeper.EditorTools
         {
             var urp = AssetDatabase.LoadAssetAtPath<UniversalRenderPipelineAsset>(MobileAsset);
             urp.supportsHDR = false;
-            urp.msaaSampleCount = 2;
-            urp.renderScale = 1f;
+            urp.msaaSampleCount = 1;
+            urp.renderScale = 0.85f;
             urp.shadowDistance = 1.5f;
             urp.useSRPBatcher = true;
 
             var so = new SerializedObject(urp);
             so.FindProperty("m_AdditionalLightsRenderingMode").intValue = 0;
-            so.FindProperty("m_MainLightShadowmapResolution").intValue = 1024;
+            so.FindProperty("m_MainLightShadowmapResolution").intValue = 512;
             so.FindProperty("m_RequireDepthTexture").boolValue = false;
             so.FindProperty("m_RequireOpaqueTexture").boolValue = false;
             so.ApplyModifiedPropertiesWithoutUndo();

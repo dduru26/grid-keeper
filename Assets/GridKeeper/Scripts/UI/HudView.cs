@@ -30,6 +30,10 @@ namespace GridKeeper.UI
         private VisualElement edge;
         private ShiftChart chart;
         private float bannerTimer;
+        private int shownSupply = -1;
+        private int shownDemand = -1;
+        private int shownStored = -2;
+        private int shownMinute = -1;
 
         private void Start()
         {
@@ -74,6 +78,8 @@ namespace GridKeeper.UI
             hud.EnableInClassList("hidden", phase == GamePhase.Placing);
             if (phase == GamePhase.Briefing)
             {
+                shownMinute = shownSupply = shownDemand = -1;
+                shownStored = -2;
                 RenderClock();
                 RenderForecast(0);
                 chart.SetData(game.Stats.Samples, liveWindowHours, liveWindowHours, true);
@@ -83,9 +89,28 @@ namespace GridKeeper.UI
         private void OnTick(TickResult tick)
         {
             RenderClock();
-            supply.text = "SUPPLY " + tick.DeliveredMW.ToString("0.0") + " MW";
-            demand.text = "DEMAND " + tick.DemandMW.ToString("0.0") + " MW";
-            stored.text = tick.CapacityMWh > 0f ? "STORED " + Mathf.RoundToInt(tick.Charge01 * 100f) + "%" : "NO STORAGE";
+
+            int supplyTenths = Mathf.RoundToInt(tick.DeliveredMW * 10f);
+            if (supplyTenths != shownSupply)
+            {
+                shownSupply = supplyTenths;
+                supply.text = "SUPPLY " + (supplyTenths / 10f).ToString("0.0") + " MW";
+            }
+
+            int demandTenths = Mathf.RoundToInt(tick.DemandMW * 10f);
+            if (demandTenths != shownDemand)
+            {
+                shownDemand = demandTenths;
+                demand.text = "DEMAND " + (demandTenths / 10f).ToString("0.0") + " MW";
+            }
+
+            int storedPercent = tick.CapacityMWh > 0f ? Mathf.RoundToInt(tick.Charge01 * 100f) : -1;
+            if (storedPercent != shownStored)
+            {
+                shownStored = storedPercent;
+                stored.text = storedPercent < 0 ? "NO STORAGE" : "STORED " + storedPercent + "%";
+            }
+
             chart.SetData(game.Stats.Samples, liveWindowHours, liveWindowHours, true);
         }
 
@@ -101,6 +126,9 @@ namespace GridKeeper.UI
 
         private void RenderClock()
         {
+            int minute = Mathf.FloorToInt(game.Clock.ElapsedHours * 60f);
+            if (minute == shownMinute) return;
+            shownMinute = minute;
             day.text = "DAY " + game.Clock.Day + " OF " + game.Clock.Days;
             time.text = GameClock.Format(game.Clock.HourOfDay);
         }
